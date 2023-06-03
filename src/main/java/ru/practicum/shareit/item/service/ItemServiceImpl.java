@@ -72,6 +72,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public String delete(Long itemId) {
-        return itemRepository.delete(itemId)? "Айтем удален" : "Айтем нельзя удалить";
+        return itemRepository.delete(itemId) ? "Айтем удален" : "Айтем нельзя удалить";
     }
 }

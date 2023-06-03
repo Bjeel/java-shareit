@@ -52,6 +52,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String delete(Long userId) {
-        return userRepository.delete(userId)? "Пользователь удален" : "Пользователья нельзя удалить";
+        return userRepository.delete(userId) ? "Пользователь удален" : "Пользователья нельзя удалить";
     }
 }
