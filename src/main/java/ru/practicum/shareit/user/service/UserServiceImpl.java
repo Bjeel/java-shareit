@@ -12,46 +12,46 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+  @Autowired
+  public UserServiceImpl(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
 
-    @Override
-    public UserDto create(User user) {
-        User createdUser = userRepository.create(user);
+  @Override
+  public UserDto create(UserDto user) {
+    User createdUser = userRepository.create(UserMapper.toUser(user));
 
-        return UserMapper.toUserDto(createdUser);
-    }
+    return UserMapper.toUserDto(createdUser);
+  }
 
-    @Override
-    public UserDto finOne(Long userId) {
-        User user = userRepository.findOne(userId);
+  @Override
+  public UserDto finOne(Long userId) {
+    User user = userRepository.findOne(userId);
 
-        return UserMapper.toUserDto(user);
-    }
+    return UserMapper.toUserDto(user);
+  }
 
-    @Override
-    public List<UserDto> findAll() {
-        List<User> users = userRepository.findAll();
+  @Override
+  public List<UserDto> findAll() {
+    List<User> users = userRepository.findAll();
 
-        return users
-            .stream()
-            .map(UserMapper::toUserDto)
-            .collect(Collectors.toList());
-    }
+    return users
+      .stream()
+      .map(UserMapper::toUserDto)
+      .collect(Collectors.toList());
+  }
 
-    @Override
-    public UserDto update(UserDto user) {
-        User updatedUser = userRepository.update(user);
+  @Override
+  public UserDto update(UserDto user) {
+    User updatedUser = userRepository.update(user);
 
-        return UserMapper.toUserDto(updatedUser);
-    }
+    return UserMapper.toUserDto(updatedUser);
+  }
 
-    @Override
-    public String delete(Long userId) {
-        return userRepository.delete(userId) ? "Пользователь удален" : "Пользователья нельзя удалить";
-    }
+  @Override
+  public String delete(Long userId) {
+    return userRepository.delete(userId) ? "Пользователь удален" : "Пользователья нельзя удалить";
+  }
 }

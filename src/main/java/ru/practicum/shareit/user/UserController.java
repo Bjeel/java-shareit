@@ -1,10 +1,8 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.domain.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -14,37 +12,42 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
-    private final UserService userService;
+  private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+  @Autowired
+  public UserController(UserService userService) {
+    this.userService = userService;
+  }
 
-    @PostMapping
-    public ResponseEntity<UserDto> create(@Valid @RequestBody User user) {
-        return ResponseEntity.ok(userService.create(user));
-    }
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping
+  public UserDto create(@Valid @RequestBody UserDto user) {
+    return userService.create(user);
+  }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserDto> findOne(@PathVariable Long userId) {
-        return ResponseEntity.ok(userService.finOne(userId));
-    }
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/{userId}")
+  public UserDto findOne(@PathVariable Long userId) {
+    return userService.finOne(userId);
+  }
 
-    @GetMapping
-    public ResponseEntity<List<UserDto>> findAll() {
-        return ResponseEntity.ok(userService.findAll());
-    }
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping
+  public List<UserDto> findAll() {
+    return userService.findAll();
+  }
 
-    @PatchMapping("/{userId}")
-    public ResponseEntity<UserDto> update(@PathVariable Long userId, @Valid @RequestBody UserDto user) {
-        user.setId(userId);
+  @ResponseStatus(HttpStatus.OK)
+  @PatchMapping("/{userId}")
+  public UserDto update(@PathVariable Long userId, @Valid @RequestBody UserDto user) {
+    user.setId(userId);
 
-        return ResponseEntity.ok(userService.update(user));
-    }
+    return userService.update(user);
+  }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<String> delete(@PathVariable Long userId) {
-        return ResponseEntity.ok(userService.delete(userId));
-    }
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @DeleteMapping("/{userId}")
+  public void delete(@PathVariable Long userId) {
+    userService.delete(userId);
+  }
 }

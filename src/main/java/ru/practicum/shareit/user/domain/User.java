@@ -9,12 +9,13 @@ import javax.validation.constraints.NotBlank;
 @Data
 @Builder
 public class User {
-    private Long id;
+  @NotBlank
+  private Long id;
 
-    @NotBlank
-    private String name;
+  @NotBlank
+  private String name;
 
-    @NotBlank
-    @Email
-    private String email;
+  @NotBlank
+  @Email
+  private String email;
 }
