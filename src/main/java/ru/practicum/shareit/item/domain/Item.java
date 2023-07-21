@@ -21,9 +21,7 @@ public class Item {
   @NotNull
   private Boolean available;
 
-  @NotBlank
   private Long owner;
 
-  @NotBlank
   private Long request;
 }

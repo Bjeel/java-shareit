@@ -9,18 +9,16 @@ import javax.validation.constraints.NotNull;
 @Data
 @Builder
 public class ItemDto {
-  @NotBlank
   private Long id;
 
-  @NotBlank
+  @NotBlank(groups = ItemMarker.OnCreate.class)
   private String name;
 
-  @NotBlank
+  @NotBlank(groups = ItemMarker.OnCreate.class)
   private String description;
 
-  @NotNull
+  @NotNull(groups = ItemMarker.OnCreate.class)
   private Boolean available;
 
-  @NotBlank
   private Long owner;
 }

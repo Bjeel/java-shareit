@@ -9,13 +9,12 @@ import javax.validation.constraints.NotBlank;
 @Data
 @Builder
 public class UserDto {
-  @NotBlank
   private Long id;
 
-  @NotBlank
+  @NotBlank(groups = UserMarker.OnCreate.class)
   private String name;
 
-  @NotBlank
+  @NotBlank(groups = UserMarker.OnCreate.class)
   @Email
   private String email;
 }
