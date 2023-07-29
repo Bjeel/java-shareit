@@ -23,13 +23,6 @@ public class ItemMapper {
       throw new EntityNotFoundException("Item не может быть null");
     }
 
-    return Item
-      .builder()
-      .id(item.getId())
-      .name(item.getName())
-      .description(item.getDescription())
-      .available(item.getAvailable())
-      .owner(item.getOwner())
-      .build();
+    return new Item();
   }
 }

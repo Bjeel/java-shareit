@@ -1,14 +1,17 @@
 package ru.practicum.shareit.item.domain;
 
-import lombok.Builder;
 import lombok.Data;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-@Builder
+@Entity
+@Table(name = "items")
 public class Item {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @NotBlank
   private Long id;
 
@@ -20,7 +23,7 @@ public class Item {
 
   @NotNull
   private Boolean available;
-
+  
   private Long owner;
 
   private Long request;

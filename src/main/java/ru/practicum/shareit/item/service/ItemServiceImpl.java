@@ -2,15 +2,18 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.item.domain.Item;
 import ru.practicum.shareit.item.domain.ItemDto;
 import ru.practicum.shareit.item.domain.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,22 +29,26 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public ItemDto create(@NotNull ItemDto item) {
-    userRepository.findOne(item.getOwner());
-    Item createdItem = itemRepository.create(ItemMapper.toItemFromDto(item));
+    userRepository.findById(item.getOwner());
+    Item createdItem = itemRepository.save(ItemMapper.toItemFromDto(item));
 
     return ItemMapper.toItemDto(createdItem);
   }
 
   @Override
   public ItemDto finOne(Long itemId) {
-    Item item = itemRepository.findOne(itemId);
+    Optional<Item> optionalItem = itemRepository.findById(itemId);
 
-    return ItemMapper.toItemDto(item);
+    if (optionalItem.isPresent()) {
+      return ItemMapper.toItemDto(optionalItem.get());
+    }
+
+    throw new EntityNotFoundException("Item не найден");
   }
 
   @Override
   public List<ItemDto> findAll(Long userId, String text) {
-    List<Item> items = itemRepository.findAll(userId);
+    List<Item> items = itemRepository.findAllByOwner(userId);
 
     return items
       .stream()
@@ -55,7 +62,7 @@ public class ItemServiceImpl implements ItemService {
       return new ArrayList<>();
     }
 
-    List<Item> items = itemRepository.findAll(text);
+    List<Item> items = itemRepository.findAll();
 
     return items
       .stream()
@@ -65,14 +72,25 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public ItemDto update(@NotNull ItemDto item) {
-    userRepository.findOne(item.getOwner());
-    Item updatedItem = itemRepository.update(ItemMapper.toItemFromDto(item));
+    Optional<User> optionalUser = userRepository.findById(item.getOwner());
 
-    return ItemMapper.toItemDto(updatedItem);
+    if (optionalUser.isEmpty()) {
+      throw new EntityNotFoundException("Владелец отсутствуте");
+    }
+
+    Optional<Item> optionalItem = itemRepository.findById(item.getId());
+
+    if (optionalItem.isPresent()) {
+      Item updatedItem = itemRepository.save(ItemMapper.toItemFromDto(item));
+
+      return ItemMapper.toItemDto(updatedItem);
+    }
+
+    throw new EntityNotFoundException("Item отсутствует");
   }
 
   @Override
-  public String delete(Long itemId) {
-    return itemRepository.delete(itemId) ? "Айтем удален" : "Айтем нельзя удалить";
+  public void delete(Long itemId) {
+    itemRepository.deleteById(itemId);
   }
 }

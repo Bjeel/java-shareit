@@ -29,6 +29,7 @@ public class UserController {
     return userService.create(user);
   }
 
+
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/{userId}")
   public UserDto findOne(@PathVariable Long userId) {
