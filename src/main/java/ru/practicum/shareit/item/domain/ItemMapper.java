@@ -23,6 +23,43 @@ public class ItemMapper {
       throw new EntityNotFoundException("Item не может быть null");
     }
 
-    return new Item();
+    Item newItem = new Item();
+
+    newItem.setId(item.getId());
+    newItem.setAvailable(item.getAvailable());
+    newItem.setName(item.getName());
+    newItem.setDescription(item.getDescription());
+    newItem.setOwner(item.getOwner());
+    newItem.setRequest(newItem.getRequest());
+
+    return newItem;
+  }
+
+  public static Item toUpdatedItem(ItemDto item, Item updatedItem) {
+    if (item == null || updatedItem == null) {
+      throw new EntityNotFoundException("Item не может быть null");
+    }
+
+    if (item.getId() != null) {
+      updatedItem.setId(item.getId());
+    }
+
+    if (item.getAvailable() != null) {
+      updatedItem.setAvailable(item.getAvailable());
+    }
+
+    if (item.getName() != null) {
+      updatedItem.setName(item.getName());
+    }
+
+    if (item.getDescription() != null) {
+      updatedItem.setDescription(item.getDescription());
+    }
+
+    if (item.getOwner() != null) {
+      updatedItem.setOwner(item.getOwner());
+    }
+
+    return updatedItem;
   }
 }

@@ -28,6 +28,7 @@ public class ItemController {
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
   public ItemDto create(@Valid @RequestBody ItemDto item, @NotNull @RequestHeader("X-Sharer-User-Id") Long userId) {
+    System.out.println(userId);
     item.setOwner(userId);
 
     return itemService.create(item);

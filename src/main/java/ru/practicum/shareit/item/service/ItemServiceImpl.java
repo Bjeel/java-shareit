@@ -29,7 +29,12 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public ItemDto create(@NotNull ItemDto item) {
-    userRepository.findById(item.getOwner());
+    Optional<User> optionalUser = userRepository.findById(item.getOwner());
+
+    if (optionalUser.isEmpty()) {
+      throw new EntityNotFoundException("Нет пользоателя для которого создается Item");
+    }
+
     Item createdItem = itemRepository.save(ItemMapper.toItemFromDto(item));
 
     return ItemMapper.toItemDto(createdItem);
@@ -81,9 +86,11 @@ public class ItemServiceImpl implements ItemService {
     Optional<Item> optionalItem = itemRepository.findById(item.getId());
 
     if (optionalItem.isPresent()) {
-      Item updatedItem = itemRepository.save(ItemMapper.toItemFromDto(item));
+      Item updatedItem = optionalItem.get();
 
-      return ItemMapper.toItemDto(updatedItem);
+      updatedItem = ItemMapper.toUpdatedItem(item, updatedItem);
+
+      return ItemMapper.toItemDto(itemRepository.save(updatedItem));
     }
 
     throw new EntityNotFoundException("Item отсутствует");
