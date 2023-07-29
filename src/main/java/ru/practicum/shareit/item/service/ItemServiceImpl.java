@@ -67,7 +67,7 @@ public class ItemServiceImpl implements ItemService {
       return new ArrayList<>();
     }
 
-    List<Item> items = itemRepository.findAll();
+    List<Item> items = itemRepository.search(text);
 
     return items
       .stream()
