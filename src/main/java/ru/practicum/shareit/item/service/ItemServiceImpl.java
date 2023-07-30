@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Status;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ItemServiceImpl implements ItemService {
   private final ItemRepository itemRepository;
@@ -184,9 +186,9 @@ public class ItemServiceImpl implements ItemService {
 
   private void addBooking(Item item, ItemFullDto itemFullDto) {
     List<Booking> bookingList = bookingRepository.findAllByItem(item);
+    log.info(item.toString());
 
-
-    final Booking[] prevBooking = {null};
+    final Booking[] lastBooking = {null};
     final Booking[] nextBooking = {null};
 
     LocalDateTime currentDate = LocalDateTime.now();
@@ -196,28 +198,25 @@ public class ItemServiceImpl implements ItemService {
         return;
       }
 
-      if (booking.getEnd().isBefore(currentDate)) {
-        if (prevBooking[0] == null) {
-          prevBooking[0] = booking;
-
-          return;
+      if (booking.getStart().isBefore(currentDate)) {
+        if (lastBooking[0] == null) {
+          lastBooking[0] = booking;
+        } else {
+          lastBooking[0] = booking.getStart().isAfter(lastBooking[0].getStart()) ? booking : lastBooking[0];
         }
-
-        prevBooking[0] = booking.getEnd().isAfter(prevBooking[0].getEnd()) ? booking : prevBooking[0];
       }
 
       if (booking.getStart().isAfter(currentDate)) {
         if (nextBooking[0] == null) {
           nextBooking[0] = booking;
 
-          return;
+        } else {
+          nextBooking[0] = booking.getEnd().isBefore(nextBooking[0].getEnd()) ? booking : nextBooking[0];
         }
-
-        nextBooking[0] = booking.getEnd().isBefore(nextBooking[0].getEnd()) ? booking : nextBooking[0];
       }
     });
 
-    itemFullDto.setLastBooking(BookingMapper.toBookingItemDto(prevBooking[0]));
+    itemFullDto.setLastBooking(BookingMapper.toBookingItemDto(lastBooking[0]));
     itemFullDto.setNextBooking(BookingMapper.toBookingItemDto(nextBooking[0]));
   }
 }
