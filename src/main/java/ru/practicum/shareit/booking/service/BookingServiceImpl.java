@@ -143,6 +143,14 @@ public class BookingServiceImpl implements BookingService {
       bookings = bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(user, LocalDateTime.now());
     }
 
+    if (state.equals(State.WAITING)) {
+      bookings = bookingRepository.findAllByBookerAndStatus(user, Status.WAITING);
+    }
+
+    if (state.equals(State.REJECTED)) {
+      bookings = bookingRepository.findAllByBookerAndStatus(user, Status.REJECTED);
+    }
+
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());
   }
 
@@ -171,6 +179,14 @@ public class BookingServiceImpl implements BookingService {
 
     if (state.equals(State.FUTURE)) {
       bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(user.getId(), LocalDateTime.now());
+    }
+
+    if (state.equals(State.WAITING)) {
+      bookings = bookingRepository.findAllByItemOwnerAndStatus(user.getId(), Status.WAITING);
+    }
+
+    if (state.equals(State.REJECTED)) {
+      bookings = bookingRepository.findAllByItemOwnerAndStatus(user.getId(), Status.REJECTED);
     }
 
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());

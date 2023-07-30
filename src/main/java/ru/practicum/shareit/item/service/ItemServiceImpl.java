@@ -141,9 +141,6 @@ public class ItemServiceImpl implements ItemService {
         return;
       }
 
-      System.out.println(booking);
-      System.out.println(booking.getEnd().isBefore(currentDate));
-
       if (booking.getEnd().isBefore(currentDate)) {
         if (prevBooking[0] == null) {
           prevBooking[0] = booking;
