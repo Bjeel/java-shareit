@@ -38,8 +38,8 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public BookingFullDto create(BookingDto BookingDto) {
-    Optional<Item> optionalItem = itemRepository.findById(BookingDto.getItemId());
+  public BookingFullDto create(BookingDto bookingDto) {
+    Optional<Item> optionalItem = itemRepository.findById(bookingDto.getItemId());
 
     if (optionalItem.isEmpty()) {
       throw new EntityNotFoundException("Невозможно создать заявку к отсутствующей вещи");
@@ -49,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
       throw new UnavailableAccessException("Нельзя взять недоступную вещь");
     }
 
-    Optional<User> optionalUser = userRepository.findById(BookingDto.getBooker());
+    Optional<User> optionalUser = userRepository.findById(bookingDto.getBooker());
 
     if (optionalUser.isEmpty()) {
       throw new EntityNotFoundException("Невозможно создать заявку для не существющего пользователя");
@@ -59,19 +59,19 @@ public class BookingServiceImpl implements BookingService {
       throw new EntityNotFoundException("Нельзя арендовать у самого себя");
     }
 
-    if (BookingDto.getStart() == null || BookingDto.getEnd() == null) {
+    if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
       throw new UnavailableAccessException("Дата начала или окончания аренды не могут быть пустыми");
     }
 
-    if (BookingDto.getStart().isAfter(BookingDto.getEnd())) {
+    if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
       throw new UnavailableAccessException("Дата начала аренды не может быть позже окончания");
     }
 
-    if (BookingDto.getStart().equals(BookingDto.getEnd())) {
+    if (bookingDto.getStart().equals(bookingDto.getEnd())) {
       throw new UnavailableAccessException("Дата начала и окончания аренды не могут быть одинаковы");
     }
 
-    Booking booking = bookingRepository.save(BookingMapper.toBooking(BookingDto, optionalItem.get(), optionalUser.get()));
+    Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, optionalItem.get(), optionalUser.get()));
 
     return BookingMapper.toFullDto(booking);
   }
