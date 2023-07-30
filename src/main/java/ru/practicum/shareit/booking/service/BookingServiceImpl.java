@@ -9,12 +9,13 @@ import ru.practicum.shareit.booking.domain.BookingMapper;
 import ru.practicum.shareit.booking.domain.BookingNewDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.exception.UnavailableItemException;
+import ru.practicum.shareit.exception.UnavailableAccessException;
 import ru.practicum.shareit.item.domain.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -40,7 +41,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     if (!optionalItem.get().getAvailable()) {
-      throw new UnavailableItemException("Нельзя взять недоступную вещь");
+      throw new UnavailableAccessException("Нельзя взять недоступную вещь");
     }
 
     Optional<User> optionalUser = userRepository.findById(BookingDto.getBooker());
@@ -50,15 +51,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
     if (BookingDto.getStart() == null || BookingDto.getEnd() == null) {
-      throw new UnavailableItemException("Дата начала или окончания аренды не могут быть пустыми");
+      throw new UnavailableAccessException("Дата начала или окончания аренды не могут быть пустыми");
     }
 
     if (BookingDto.getStart().isAfter(BookingDto.getEnd())) {
-      throw new UnavailableItemException("Дата начала аренды не может быть позже окончания");
+      throw new UnavailableAccessException("Дата начала аренды не может быть позже окончания");
     }
 
     if (BookingDto.getStart().equals(BookingDto.getEnd())) {
-      throw new UnavailableItemException("Дата начала и окончания аренды не могут быть одинаковы");
+      throw new UnavailableAccessException("Дата начала и окончания аренды не могут быть одинаковы");
     }
 
     Booking booking = bookingRepository.save(BookingMapper.toBooking(BookingDto, optionalItem.get(), optionalUser.get()));
@@ -67,15 +68,38 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public BookingNewDto approve(Long id, Boolean approved) {
+  public BookingNewDto approve(Long id, Boolean approved, Long userId) {
     Optional<Booking> optionalBooking = bookingRepository.findById(id);
+
     if (optionalBooking.isEmpty()) {
       throw new EntityNotFoundException("Аренда не найдена");
     }
 
     Booking booking = optionalBooking.get();
+
+    if (!Objects.equals(booking.getItem().getOwner(), userId)) {
+      throw new UnavailableAccessException("Только владелец может подвердить аренду");
+    }
+
     booking.setStatus(approved ? Status.APPROVED : Status.CANCELED);
 
     return BookingMapper.toDto(bookingRepository.save(booking));
+  }
+
+  @Override
+  public BookingNewDto findById(Long id, Long userId) {
+    Optional<Booking> optionalBooking = bookingRepository.findById(id);
+
+    if (optionalBooking.isEmpty()) {
+      throw new EntityNotFoundException("Аренда не найдена");
+    }
+
+    Booking booking = optionalBooking.get();
+
+    if (!Objects.equals(booking.getBooker().getId(), userId) && !Objects.equals(booking.getItem().getOwner(), userId)) {
+      throw new UnavailableAccessException("Только арендатор и арендуемый может посмотреть аренду");
+    }
+
+    return BookingMapper.toDto(booking);
   }
 }
