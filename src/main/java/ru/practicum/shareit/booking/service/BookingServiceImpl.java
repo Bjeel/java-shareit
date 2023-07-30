@@ -144,11 +144,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     if (state.equals(State.WAITING)) {
-      bookings = bookingRepository.findAllByBookerAndStatus(user, Status.WAITING);
+      bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.WAITING);
     }
 
     if (state.equals(State.REJECTED)) {
-      bookings = bookingRepository.findAllByBookerAndStatus(user, Status.REJECTED);
+      bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.REJECTED);
+    }
+
+    if (state.equals(State.CURRENT)) {
+      LocalDateTime dateTime = LocalDateTime.now();
+
+      bookings = bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime, dateTime);
+    }
+
+    if (state.equals(State.PAST)) {
+      bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(user, LocalDateTime.now());
     }
 
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());
@@ -182,11 +192,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     if (state.equals(State.WAITING)) {
-      bookings = bookingRepository.findAllByItemOwnerAndStatus(user.getId(), Status.WAITING);
+      bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.WAITING);
     }
 
     if (state.equals(State.REJECTED)) {
-      bookings = bookingRepository.findAllByItemOwnerAndStatus(user.getId(), Status.REJECTED);
+      bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.REJECTED);
+    }
+
+    if (state.equals(State.CURRENT)) {
+      LocalDateTime dateTime = LocalDateTime.now();
+
+      bookings = bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(user.getId(), dateTime, dateTime);
+    }
+
+    if (state.equals(State.PAST)) {
+      bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(user.getId(), LocalDateTime.now());
     }
 
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());

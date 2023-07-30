@@ -1,7 +1,6 @@
 package ru.practicum.shareit.comments.domain;
 
 import lombok.Data;
-import ru.practicum.shareit.item.domain.Item;
 import ru.practicum.shareit.user.domain.User;
 
 import javax.persistence.*;
@@ -17,9 +16,7 @@ public class Comment {
 
   private String text;
 
-  @OneToOne
-  @JoinColumn(name = "item")
-  private Item item;
+  private Long itemId;
 
   @OneToOne
   @JoinColumn(name = "author")

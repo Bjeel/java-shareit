@@ -71,6 +71,10 @@ public class ItemServiceImpl implements ItemService {
 
     ItemFullDto itemFullDto = ItemMapper.toItemBookingsDto(item);
 
+    List<Comment> comments = commentRepository.findAllByItemId(item.getId());
+
+    itemFullDto.setComments(comments.stream().map(CommentMapper::toCommentNewDto).collect(Collectors.toList()));
+
     if (userId.equals(item.getOwner())) {
       addBooking(item, itemFullDto);
     }
@@ -164,14 +168,14 @@ public class ItemServiceImpl implements ItemService {
       throw new UnavailableAccessException("Нет подходящей аренды");
     }
 
-    if (booking.getStart().isAfter(LocalDateTime.now())) {
+    if (booking.getStart().isBefore(LocalDateTime.now())) {
       throw new UnavailableAccessException("Нельзя оставить отзыв для того, что еще не было в аренде");
     }
 
     Comment newComment = CommentMapper.toComment(commentDto);
 
     newComment.setAuthor(optionalUser.get());
-    newComment.setItem(optionalItem.get());
+    newComment.setItemId(optionalItem.get().getId());
 
     Comment comment = commentRepository.save(newComment);
 

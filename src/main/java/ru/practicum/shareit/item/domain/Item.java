@@ -25,6 +25,5 @@ public class Item {
   private Long request;
 
   @OneToMany
-  @JoinColumn(name = "item")
   private List<Comment> comments;
 }
