@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.domain.Booking;
 import ru.practicum.shareit.booking.domain.BookingDto;
 import ru.practicum.shareit.booking.domain.BookingMapper;
@@ -62,6 +63,19 @@ public class BookingServiceImpl implements BookingService {
 
     Booking booking = bookingRepository.save(BookingMapper.toBooking(BookingDto, optionalItem.get(), optionalUser.get()));
 
-    return BookingMapper.toDto(booking, optionalItem.get());
+    return BookingMapper.toDto(booking);
+  }
+
+  @Override
+  public BookingNewDto approve(Long id, Boolean approved) {
+    Optional<Booking> optionalBooking = bookingRepository.findById(id);
+    if (optionalBooking.isEmpty()) {
+      throw new EntityNotFoundException("Аренда не найдена");
+    }
+
+    Booking booking = optionalBooking.get();
+    booking.setStatus(approved ? Status.APPROVED : Status.CANCELED);
+
+    return BookingMapper.toDto(bookingRepository.save(booking));
   }
 }

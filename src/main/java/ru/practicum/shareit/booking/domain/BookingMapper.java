@@ -20,12 +20,23 @@ public class BookingMapper {
     return booking;
   }
 
-  public static BookingNewDto toDto(Booking save, Item item) {
+  public static BookingNewDto toDtoFromNewBooking(Booking save, Item item) {
     return BookingNewDto.builder()
       .id(save.getId())
       .end(LocalDateTime.parse(save.getEnd()))
       .start(LocalDateTime.parse(save.getStart()))
       .item(item)
+      .booker(save.getBooker())
+      .status(save.getStatus())
+      .build();
+  }
+
+  public static BookingNewDto toDto(Booking save) {
+    return BookingNewDto.builder()
+      .id(save.getId())
+      .end(LocalDateTime.parse(save.getEnd()))
+      .start(LocalDateTime.parse(save.getStart()))
+      .item(save.getItem())
       .booker(save.getBooker())
       .status(save.getStatus())
       .build();

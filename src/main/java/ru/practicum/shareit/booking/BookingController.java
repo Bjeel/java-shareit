@@ -31,4 +31,9 @@ public class BookingController {
     return bookingService.create(bookingNewDto);
   }
 
+
+  @PatchMapping("/{id}")
+  public BookingNewDto approve(@PathVariable Long id, @NotNull @RequestParam("approved") Boolean approved) {
+    return bookingService.approve(id, approved);
+  }
 }
