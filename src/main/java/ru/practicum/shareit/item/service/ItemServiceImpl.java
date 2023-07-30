@@ -158,20 +158,17 @@ public class ItemServiceImpl implements ItemService {
       throw new EntityNotFoundException("Item отсутствует");
     }
 
-    Optional<Booking> optionalBooking = bookingRepository.findByItemAndBookerAndEndAfter(optionalItem.get(), optionalUser.get(), LocalDateTime.now());
+    Optional<Booking> optionalBooking = bookingRepository.findTopByItemAndBookerAndStartIsBeforeOrderByStartDesc(optionalItem.get(), optionalUser.get(), LocalDateTime.now());
+
 
     if (optionalBooking.isEmpty()) {
-      throw new EntityNotFoundException("Нет подходящей аренды");
+      throw new UnavailableAccessException("Нет подходящей аренды");
     }
 
     Booking booking = optionalBooking.get();
 
     if (!booking.getStatus().equals(Status.APPROVED)) {
       throw new UnavailableAccessException("Нет подходящей аренды");
-    }
-
-    if (booking.getStart().isBefore(LocalDateTime.now())) {
-      throw new UnavailableAccessException("Нельзя оставить отзыв для того, что еще не было в аренде");
     }
 
     Comment newComment = CommentMapper.toComment(commentDto);
@@ -186,7 +183,6 @@ public class ItemServiceImpl implements ItemService {
 
   private void addBooking(Item item, ItemFullDto itemFullDto) {
     List<Booking> bookingList = bookingRepository.findAllByItem(item);
-    log.info(item.toString());
 
     final Booking[] lastBooking = {null};
     final Booking[] nextBooking = {null};
