@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.domain.ItemBookingsDto;
 import ru.practicum.shareit.item.domain.ItemDto;
 import ru.practicum.shareit.item.domain.ItemMarker;
 import ru.practicum.shareit.item.service.ItemService;
@@ -35,14 +36,14 @@ public class ItemController {
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/{itemId}")
-  public ItemDto findOne(@PathVariable Long itemId) {
-    return itemService.finOne(itemId);
+  public ItemBookingsDto findOne(@NotNull @RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId) {
+    return itemService.finOne(itemId, userId);
   }
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping
-  public List<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestParam Optional<String> text) {
-    return itemService.findAll(userId, text.orElse(null));
+  public List<ItemBookingsDto> findAll(@NotNull @RequestHeader("X-Sharer-User-Id") Long userId) {
+    return itemService.findAll(userId);
   }
 
   @ResponseStatus(HttpStatus.OK)

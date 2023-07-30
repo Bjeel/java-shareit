@@ -2,8 +2,13 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.domain.Booking;
+import ru.practicum.shareit.booking.domain.BookingMapper;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.item.domain.Item;
+import ru.practicum.shareit.item.domain.ItemBookingsDto;
 import ru.practicum.shareit.item.domain.ItemDto;
 import ru.practicum.shareit.item.domain.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -11,6 +16,7 @@ import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +26,13 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
   private final ItemRepository itemRepository;
   private final UserRepository userRepository;
+  private final BookingRepository bookingRepository;
 
   @Autowired
-  public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository) {
+  public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository) {
     this.itemRepository = itemRepository;
     this.userRepository = userRepository;
+    this.bookingRepository = bookingRepository;
   }
 
   @Override
@@ -41,23 +49,41 @@ public class ItemServiceImpl implements ItemService {
   }
 
   @Override
-  public ItemDto finOne(Long itemId) {
+  public ItemBookingsDto finOne(Long itemId, Long userId) {
     Optional<Item> optionalItem = itemRepository.findById(itemId);
 
-    if (optionalItem.isPresent()) {
-      return ItemMapper.toItemDto(optionalItem.get());
+    if (optionalItem.isEmpty()) {
+      throw new EntityNotFoundException("Item не найден");
     }
 
-    throw new EntityNotFoundException("Item не найден");
+    Item item = optionalItem.get();
+
+    ItemBookingsDto itemBookingsDto = ItemMapper.toItemBookingsDto(item);
+
+    if (userId.equals(item.getOwner())) {
+      addBooking(item, itemBookingsDto);
+    }
+
+    return itemBookingsDto;
+
   }
 
   @Override
-  public List<ItemDto> findAll(Long userId, String text) {
+  public List<ItemBookingsDto> findAll(Long userId) {
     List<Item> items = itemRepository.findAllByOwner(userId);
 
     return items
       .stream()
-      .map(ItemMapper::toItemDto)
+      .map(item -> {
+
+        ItemBookingsDto itemBookingsDto = ItemMapper.toItemBookingsDto(item);
+
+        if (userId.equals(item.getOwner())) {
+          addBooking(item, itemBookingsDto);
+        }
+
+        return itemBookingsDto;
+      })
       .collect(Collectors.toList());
   }
 
@@ -99,5 +125,47 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public void delete(Long itemId) {
     itemRepository.deleteById(itemId);
+  }
+
+  private void addBooking(Item item, ItemBookingsDto itemBookingsDto) {
+    List<Booking> bookingList = bookingRepository.findAllByItem(item);
+
+
+    final Booking[] prevBooking = {null};
+    final Booking[] nextBooking = {null};
+
+    LocalDateTime currentDate = LocalDateTime.now();
+
+    bookingList.forEach(booking -> {
+      if (!booking.getStatus().equals(Status.APPROVED)) {
+        return;
+      }
+
+      System.out.println(booking);
+      System.out.println(booking.getEnd().isBefore(currentDate));
+
+      if (booking.getEnd().isBefore(currentDate)) {
+        if (prevBooking[0] == null) {
+          prevBooking[0] = booking;
+
+          return;
+        }
+
+        prevBooking[0] = booking.getEnd().isAfter(prevBooking[0].getEnd()) ? booking : prevBooking[0];
+      }
+
+      if (booking.getStart().isAfter(currentDate)) {
+        if (nextBooking[0] == null) {
+          nextBooking[0] = booking;
+
+          return;
+        }
+
+        nextBooking[0] = booking.getEnd().isBefore(nextBooking[0].getEnd()) ? booking : nextBooking[0];
+      }
+    });
+
+    itemBookingsDto.setLastBooking(BookingMapper.toBookingItemDto(prevBooking[0]));
+    itemBookingsDto.setNextBooking(BookingMapper.toBookingItemDto(nextBooking[0]));
   }
 }

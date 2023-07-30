@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.item.domain.ItemBookingsDto;
 import ru.practicum.shareit.item.domain.ItemDto;
 
 import java.util.List;
@@ -7,9 +8,9 @@ import java.util.List;
 public interface ItemService {
   ItemDto create(ItemDto item);
 
-  ItemDto finOne(Long itemId);
+  ItemBookingsDto finOne(Long itemId, Long userId);
 
-  List<ItemDto> findAll(Long userId, String text);
+  List<ItemBookingsDto> findAll(Long userId);
 
   List<ItemDto> search(String text);
 

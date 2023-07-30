@@ -27,7 +27,6 @@ public class BookingController {
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
   public BookingFullDto create(@Valid @RequestBody BookingDto bookingNewDto, @NotNull @RequestHeader("X-Sharer-User-Id") Long userId) {
-    System.out.println(bookingNewDto);
     bookingNewDto.setBooker(userId);
 
     return bookingService.create(bookingNewDto);

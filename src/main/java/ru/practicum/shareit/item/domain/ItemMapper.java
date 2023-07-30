@@ -35,6 +35,19 @@ public class ItemMapper {
     return newItem;
   }
 
+  public static ItemBookingsDto toItemBookingsDto(Item item) {
+    return ItemBookingsDto
+      .builder()
+      .id(item.getId())
+      .name(item.getName())
+      .description(item.getDescription())
+      .available(item.getAvailable())
+      .owner(item.getOwner())
+      .lastBooking(null)
+      .nextBooking(null)
+      .build();
+  }
+
   public static Item toUpdatedItem(ItemDto item, Item updatedItem) {
     if (item == null || updatedItem == null) {
       throw new EntityNotFoundException("Item не может быть null");

@@ -28,4 +28,16 @@ public class BookingMapper {
       .status(save.getStatus())
       .build();
   }
+
+  public static BookingItemDto toBookingItemDto(Booking save) {
+    if (save == null) {
+      return null;
+    }
+
+    return BookingItemDto.builder()
+      .id(save.getId())
+      .itemId(save.getItem().getId())
+      .bookerId(save.getBooker().getId())
+      .build();
+  }
 }
