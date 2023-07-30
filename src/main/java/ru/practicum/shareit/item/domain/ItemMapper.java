@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.domain;
 
+import ru.practicum.shareit.comments.domain.CommentMapper;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+
+import java.util.stream.Collectors;
 
 public class ItemMapper {
   public static ItemDto toItemDto(Item item) {
@@ -35,8 +38,8 @@ public class ItemMapper {
     return newItem;
   }
 
-  public static ItemBookingsDto toItemBookingsDto(Item item) {
-    return ItemBookingsDto
+  public static ItemFullDto toItemBookingsDto(Item item) {
+    return ItemFullDto
       .builder()
       .id(item.getId())
       .name(item.getName())
@@ -45,6 +48,7 @@ public class ItemMapper {
       .owner(item.getOwner())
       .lastBooking(null)
       .nextBooking(null)
+      .comments(item.getComments().stream().map(CommentMapper::toCommentNewDto).collect(Collectors.toList()))
       .build();
   }
 

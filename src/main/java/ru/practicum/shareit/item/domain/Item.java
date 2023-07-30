@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item.domain;
 
 import lombok.Data;
+import ru.practicum.shareit.comments.domain.Comment;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity
@@ -21,4 +23,8 @@ public class Item {
   private Long owner;
 
   private Long request;
+
+  @OneToMany
+  @JoinColumn(name = "item")
+  private List<Comment> comments;
 }

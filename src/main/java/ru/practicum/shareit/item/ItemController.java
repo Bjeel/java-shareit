@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.domain.ItemBookingsDto;
+import ru.practicum.shareit.comments.domain.CommentDto;
+import ru.practicum.shareit.comments.domain.CommentNewDto;
 import ru.practicum.shareit.item.domain.ItemDto;
+import ru.practicum.shareit.item.domain.ItemFullDto;
 import ru.practicum.shareit.item.domain.ItemMarker;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -34,15 +36,26 @@ public class ItemController {
     return itemService.create(item);
   }
 
+  @ResponseStatus(HttpStatus.CREATED)
+  @PostMapping("/{id}/comment")
+  public CommentNewDto addComment(@Valid @RequestBody CommentDto commentDto,
+                                  @PathVariable Long id,
+                                  @NotNull @RequestHeader("X-Sharer-User-Id") Long userId) {
+    commentDto.setAuthorId(userId);
+    commentDto.setItemId(id);
+
+    return itemService.addComment(commentDto);
+  }
+
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/{itemId}")
-  public ItemBookingsDto findOne(@NotNull @RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId) {
+  public ItemFullDto findOne(@NotNull @RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId) {
     return itemService.finOne(itemId, userId);
   }
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping
-  public List<ItemBookingsDto> findAll(@NotNull @RequestHeader("X-Sharer-User-Id") Long userId) {
+  public List<ItemFullDto> findAll(@NotNull @RequestHeader("X-Sharer-User-Id") Long userId) {
     return itemService.findAll(userId);
   }
 
