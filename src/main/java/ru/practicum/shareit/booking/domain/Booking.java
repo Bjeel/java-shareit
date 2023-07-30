@@ -6,6 +6,7 @@ import ru.practicum.shareit.item.domain.Item;
 import ru.practicum.shareit.user.domain.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -16,10 +17,10 @@ public class Booking {
   private Long id;
 
   @Column(name = "start_time")
-  private String start;
+  private LocalDateTime start;
 
   @Column(name = "end_time")
-  private String end;
+  private LocalDateTime end;
 
   @ManyToOne
   @JoinColumn(name = "item_id")
