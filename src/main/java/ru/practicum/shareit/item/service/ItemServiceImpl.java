@@ -12,6 +12,7 @@ import ru.practicum.shareit.comments.domain.CommentMapper;
 import ru.practicum.shareit.comments.domain.CommentNewDto;
 import ru.practicum.shareit.comments.repository.CommentRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.UnavailableAccessException;
 import ru.practicum.shareit.item.domain.Item;
 import ru.practicum.shareit.item.domain.ItemDto;
 import ru.practicum.shareit.item.domain.ItemFullDto;
@@ -157,10 +158,18 @@ public class ItemServiceImpl implements ItemService {
       throw new EntityNotFoundException("Нет подходящей аренды");
     }
 
-    Comment newComment = new Comment();
+    Booking booking = optionalBooking.get();
 
-    newComment.setText(commentDto.getText());
-    newComment.setCreated(LocalDateTime.now());
+    if (!booking.getStatus().equals(Status.APPROVED)) {
+      throw new UnavailableAccessException("Нет подходящей аренды");
+    }
+
+    if (booking.getStart().isAfter(LocalDateTime.now())) {
+      throw new UnavailableAccessException("Нельзя оставить отзыв для того, что еще не было в аренде");
+    }
+
+    Comment newComment = CommentMapper.toComment(commentDto);
+
     newComment.setAuthor(optionalUser.get());
     newComment.setItem(optionalItem.get());
 

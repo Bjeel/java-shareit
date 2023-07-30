@@ -36,7 +36,7 @@ public class ItemController {
     return itemService.create(item);
   }
 
-  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseStatus(HttpStatus.OK)
   @PostMapping("/{id}/comment")
   public CommentNewDto addComment(@Valid @RequestBody CommentDto commentDto,
                                   @PathVariable Long id,
