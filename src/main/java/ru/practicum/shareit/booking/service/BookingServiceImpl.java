@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
@@ -20,47 +21,29 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
+@Slf4j
 public class BookingServiceImpl implements BookingService {
 
   BookingRepository bookingRepository;
   ItemRepository itemRepository;
   UserRepository userRepository;
 
-  @Autowired
-  public BookingServiceImpl(BookingRepository bookingRepository, ItemRepository itemRepository, UserRepository userRepository) {
-    this.bookingRepository = bookingRepository;
-    this.itemRepository = itemRepository;
-    this.userRepository = userRepository;
-  }
-
   @Override
   public BookingFullDto create(BookingDto bookingDto) {
-    Optional<Item> optionalItem = itemRepository.findById(bookingDto.getItemId());
+    Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() -> new EntityNotFoundException("Предмет не найден"));
 
-    if (optionalItem.isEmpty()) {
-      throw new EntityNotFoundException("Невозможно создать заявку к отсутствующей вещи");
-    }
-
-    if (!optionalItem.get().getAvailable()) {
+    if (!item.getAvailable()) {
       throw new UnavailableAccessException("Нельзя взять недоступную вещь");
     }
 
-    Optional<User> optionalUser = userRepository.findById(bookingDto.getBooker());
+    User user = userRepository.findById(bookingDto.getBooker()).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (optionalUser.isEmpty()) {
-      throw new EntityNotFoundException("Невозможно создать заявку для не существющего пользователя");
-    }
-
-    if (optionalUser.get().getId().equals(optionalItem.get().getId())) {
+    if (user.getId().equals(item.getId())) {
       throw new EntityNotFoundException("Нельзя арендовать у самого себя");
-    }
-
-    if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
-      throw new UnavailableAccessException("Дата начала или окончания аренды не могут быть пустыми");
     }
 
     if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
@@ -71,20 +54,16 @@ public class BookingServiceImpl implements BookingService {
       throw new UnavailableAccessException("Дата начала и окончания аренды не могут быть одинаковы");
     }
 
-    Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, optionalItem.get(), optionalUser.get()));
+    Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, item, user));
+
+    log.info("{} аренда создана", booking);
 
     return BookingMapper.toFullDto(booking);
   }
 
   @Override
   public BookingFullDto approve(Long id, Boolean approved, Long userId) {
-    Optional<Booking> optionalBooking = bookingRepository.findById(id);
-
-    if (optionalBooking.isEmpty()) {
-      throw new EntityNotFoundException("Аренда не найдена");
-    }
-
-    Booking booking = optionalBooking.get();
+    Booking booking = bookingRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Аренда не найден"));
 
     if (!Objects.equals(booking.getItem().getOwner(), userId)) {
       throw new EntityNotFoundException("Только владелец может подвердить аренду");
@@ -96,23 +75,19 @@ public class BookingServiceImpl implements BookingService {
 
     booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
 
+    log.info("{} аренда подтверждена", booking);
     return BookingMapper.toFullDto(bookingRepository.save(booking));
   }
 
   @Override
   public BookingFullDto findById(Long id, Long userId) {
-    Optional<Booking> optionalBooking = bookingRepository.findById(id);
-
-    if (optionalBooking.isEmpty()) {
-      throw new EntityNotFoundException("Аренда не найдена");
-    }
-
-    Booking booking = optionalBooking.get();
+    Booking booking = bookingRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Аренда не найдена"));
 
     if (!Objects.equals(booking.getBooker().getId(), userId) && !Objects.equals(booking.getItem().getOwner(), userId)) {
       throw new EntityNotFoundException("Только арендатор и арендуемый может посмотреть аренду");
     }
 
+    log.info("Получение аренды: {}", booking);
     return BookingMapper.toFullDto(booking);
   }
 
@@ -126,40 +101,37 @@ public class BookingServiceImpl implements BookingService {
       throw new RuntimeException("Unknown state: " + st);
     }
 
-    Optional<User> optionalUser = userRepository.findById(userId);
+    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (optionalUser.isEmpty()) {
-      throw new EntityNotFoundException("Пользователь не существует");
+    List<Booking> bookings;
+
+    switch (state) {
+      case ALL:
+        bookings = bookingRepository.findAllByBookerOrderByStartDesc(user);
+        break;
+      case PAST:
+        bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(user, LocalDateTime.now());
+        break;
+      case FUTURE:
+        bookings = bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(user, LocalDateTime.now());
+        break;
+      case WAITING:
+        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.WAITING);
+        break;
+      case REJECTED:
+        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.REJECTED);
+        break;
+      case CURRENT:
+        LocalDateTime dateTime = LocalDateTime.now();
+
+        bookings = bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime, dateTime);
+        break;
+
+      default:
+        bookings = new ArrayList<>();
     }
 
-    User user = optionalUser.get();
-    List<Booking> bookings = new ArrayList<>();
-
-    if (state.equals(State.ALL)) {
-      bookings = bookingRepository.findAllByBookerOrderByStartDesc(user);
-    }
-
-    if (state.equals(State.FUTURE)) {
-      bookings = bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(user, LocalDateTime.now());
-    }
-
-    if (state.equals(State.WAITING)) {
-      bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.WAITING);
-    }
-
-    if (state.equals(State.REJECTED)) {
-      bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.REJECTED);
-    }
-
-    if (state.equals(State.CURRENT)) {
-      LocalDateTime dateTime = LocalDateTime.now();
-
-      bookings = bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime, dateTime);
-    }
-
-    if (state.equals(State.PAST)) {
-      bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(user, LocalDateTime.now());
-    }
+    log.info("Получение аренд по состоянию для {}, для пользователя {}", st, user);
 
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());
   }
@@ -174,41 +146,38 @@ public class BookingServiceImpl implements BookingService {
       throw new RuntimeException("Unknown state: " + st);
     }
 
-    Optional<User> optionalUser = userRepository.findById(userId);
+    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (optionalUser.isEmpty()) {
-      throw new EntityNotFoundException("Пользователь не существует");
+    List<Booking> bookings;
+
+    switch (state) {
+      case ALL:
+        bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(user.getId());
+        break;
+      case PAST:
+        bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(user.getId(), LocalDateTime.now());
+        break;
+      case FUTURE:
+        bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(user.getId(), LocalDateTime.now());
+        break;
+      case WAITING:
+        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.WAITING);
+        break;
+      case REJECTED:
+        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.REJECTED);
+        break;
+      case CURRENT: {
+        LocalDateTime dateTime = LocalDateTime.now();
+
+        bookings = bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(user.getId(), dateTime, dateTime);
+        break;
+      }
+
+      default:
+        bookings = new ArrayList<>();
     }
 
-    User user = optionalUser.get();
-    List<Booking> bookings = new ArrayList<>();
-
-    if (state.equals(State.ALL)) {
-      bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(user.getId());
-    }
-
-    if (state.equals(State.FUTURE)) {
-      bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(user.getId(), LocalDateTime.now());
-    }
-
-    if (state.equals(State.WAITING)) {
-      bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.WAITING);
-    }
-
-    if (state.equals(State.REJECTED)) {
-      bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.REJECTED);
-    }
-
-    if (state.equals(State.CURRENT)) {
-      LocalDateTime dateTime = LocalDateTime.now();
-
-      bookings = bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(user.getId(), dateTime, dateTime);
-    }
-
-    if (state.equals(State.PAST)) {
-      bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(user.getId(), LocalDateTime.now());
-    }
-
+    log.info("Получение аренд по состоянию для {}, для владельца {}", st, user);
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());
   }
 }

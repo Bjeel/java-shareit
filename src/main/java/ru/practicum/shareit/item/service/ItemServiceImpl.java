@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.domain.Booking;
@@ -22,54 +22,36 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Transactional
 @Slf4j
 @Service
+@AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
   private final ItemRepository itemRepository;
   private final UserRepository userRepository;
   private final BookingRepository bookingRepository;
   private final CommentRepository commentRepository;
 
-  @Autowired
-  public ItemServiceImpl(ItemRepository itemRepository,
-                         UserRepository userRepository,
-                         BookingRepository bookingRepository,
-                         CommentRepository commentRepository) {
-    this.itemRepository = itemRepository;
-    this.userRepository = userRepository;
-    this.bookingRepository = bookingRepository;
-    this.commentRepository = commentRepository;
-  }
-
   @Override
   public ItemDto create(@NotNull ItemDto item) {
-    Optional<User> optionalUser = userRepository.findById(item.getOwner());
-
-    if (optionalUser.isEmpty()) {
-      throw new EntityNotFoundException("Нет пользоателя для которого создается Item");
-    }
+    userRepository.findById(item.getOwner()).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
     Item createdItem = itemRepository.save(ItemMapper.toItemFromDto(item));
 
+    log.info("Создан предмет: {}", item);
     return ItemMapper.toItemDto(createdItem);
   }
 
   @Override
-  public ItemFullDto finOne(Long itemId, Long userId) {
-    Optional<Item> optionalItem = itemRepository.findById(itemId);
-
-    if (optionalItem.isEmpty()) {
-      throw new EntityNotFoundException("Item не найден");
-    }
-
-    Item item = optionalItem.get();
+  public ItemFullDto findOne(Long itemId, Long userId) {
+    Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Предмет не найден"));
 
     ItemFullDto itemFullDto = ItemMapper.toItemBookingsDto(item);
 
@@ -81,6 +63,7 @@ public class ItemServiceImpl implements ItemService {
       addBooking(item, itemFullDto);
     }
 
+    log.info("Получение предмета: {}", item);
     return itemFullDto;
 
   }
@@ -88,6 +71,8 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public List<ItemFullDto> findAll(Long userId) {
     List<Item> items = itemRepository.findAllByOwner(userId);
+
+    log.info("Получение всех предметов пользователя {}", userId);
 
     return items
       .stream()
@@ -106,11 +91,13 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public List<ItemDto> search(String text) {
-    if (text != null && text.length() == 0) {
+    if (text != null && text.isBlank()) {
       return new ArrayList<>();
     }
 
     List<Item> items = itemRepository.search(text);
+
+    log.info("Получение предметов в соответствие с поисковым запросом: {}", text);
 
     return items
       .stream()
@@ -120,52 +107,32 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public ItemDto update(@NotNull ItemDto item) {
-    Optional<User> optionalUser = userRepository.findById(item.getOwner());
+    userRepository.findById(item.getOwner()).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (optionalUser.isEmpty()) {
-      throw new EntityNotFoundException("Владелец отсутствуте");
-    }
-
-    Optional<Item> optionalItem = itemRepository.findById(item.getId());
-
-    if (optionalItem.isEmpty()) {
-      throw new EntityNotFoundException("Item отсутствует");
-    }
-
-    Item updatedItem = optionalItem.get();
+    Item updatedItem = itemRepository.findById(item.getId()).orElseThrow(() -> new EntityNotFoundException("Предмет не найден"));
 
     updatedItem = ItemMapper.toUpdatedItem(item, updatedItem);
 
-    return ItemMapper.toItemDto(itemRepository.save(updatedItem));
+    log.info("Оббновление предмета: {}", item);
+    return ItemMapper.toItemDto(updatedItem);
   }
 
   @Override
   public void delete(Long itemId) {
     itemRepository.deleteById(itemId);
+    log.info("Предмет id {} удален", itemId);
   }
 
   @Override
   public CommentNewDto addComment(CommentDto commentDto) {
-    Optional<User> optionalUser = userRepository.findById(commentDto.getAuthorId());
+    User user = userRepository.findById(commentDto.getAuthorId()).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (optionalUser.isEmpty()) {
-      throw new EntityNotFoundException("Владелец отсутствуте");
-    }
+    Item item = itemRepository.findById(commentDto.getItemId()).orElseThrow(() -> new EntityNotFoundException("Предмет не найден"));
 
-    Optional<Item> optionalItem = itemRepository.findById(commentDto.getItemId());
-
-    if (optionalItem.isEmpty()) {
-      throw new EntityNotFoundException("Item отсутствует");
-    }
-
-    Optional<Booking> optionalBooking = bookingRepository.findTopByItemAndBookerAndStartIsBeforeOrderByStartDesc(optionalItem.get(), optionalUser.get(), LocalDateTime.now());
-
-
-    if (optionalBooking.isEmpty()) {
-      throw new UnavailableAccessException("Нет подходящей аренды");
-    }
-
-    Booking booking = optionalBooking.get();
+    Booking booking = bookingRepository.findTopByItemAndBookerAndStartIsBeforeOrderByStartDesc(item,
+      user,
+      LocalDateTime.now()
+    ).orElseThrow(() -> new UnavailableAccessException("Аренда не найдена"));
 
     if (!booking.getStatus().equals(Status.APPROVED)) {
       throw new UnavailableAccessException("Нет подходящей аренды");
@@ -173,11 +140,12 @@ public class ItemServiceImpl implements ItemService {
 
     Comment newComment = CommentMapper.toComment(commentDto);
 
-    newComment.setAuthor(optionalUser.get());
-    newComment.setItemId(optionalItem.get().getId());
+    newComment.setAuthor(user);
+    newComment.setItemId(item.getId());
 
     Comment comment = commentRepository.save(newComment);
 
+    log.info("Добавлен комментарий {} удален", commentDto);
     return CommentMapper.toCommentNewDto(comment);
   }
 
@@ -214,5 +182,7 @@ public class ItemServiceImpl implements ItemService {
 
     itemFullDto.setLastBooking(BookingMapper.toBookingItemDto(lastBooking[0]));
     itemFullDto.setNextBooking(BookingMapper.toBookingItemDto(nextBooking[0]));
+
+    log.info("Добавлен информация о последней и следующей арендах для предмета {}", item);
   }
 }

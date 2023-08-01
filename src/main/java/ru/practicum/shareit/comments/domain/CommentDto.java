@@ -3,7 +3,7 @@ package ru.practicum.shareit.comments.domain;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Data
@@ -13,7 +13,7 @@ public class CommentDto {
 
   private Long itemId;
 
-  @NotNull
+  @NotBlank
   @Size(max = 1500, min = 3)
   private String text;
 

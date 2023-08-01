@@ -10,7 +10,7 @@ import java.util.List;
 public interface ItemService {
   ItemDto create(ItemDto item);
 
-  ItemFullDto finOne(Long itemId, Long userId);
+  ItemFullDto findOne(Long itemId, Long userId);
 
   List<ItemFullDto> findAll(Long userId);
 

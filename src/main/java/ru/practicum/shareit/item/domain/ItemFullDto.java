@@ -12,17 +12,19 @@ import java.util.List;
 @Data
 @Builder
 public class ItemFullDto {
+  @NotNull
   private Long id;
 
-  @NotBlank(groups = ItemMarker.OnCreate.class)
+  @NotBlank
   private String name;
 
-  @NotBlank(groups = ItemMarker.OnCreate.class)
+  @NotBlank
   private String description;
 
-  @NotNull(groups = ItemMarker.OnCreate.class)
+  @NotNull
   private Boolean available;
 
+  @NotNull
   private Long owner;
 
   private BookingItemDto lastBooking;

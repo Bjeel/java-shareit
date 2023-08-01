@@ -1,7 +1,7 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.user.domain.User;
@@ -9,19 +9,16 @@ import ru.practicum.shareit.user.domain.UserDto;
 import ru.practicum.shareit.user.domain.UserMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Transactional
 @Slf4j
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
-
-  @Autowired
-  public UserServiceImpl(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
 
   @Override
   public UserDto create(UserDto user) {
@@ -33,16 +30,12 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserDto finOne(Long userId) {
-    Optional<User> user = userRepository.findById(userId);
+  public UserDto findOne(Long userId) {
+    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (user.isPresent()) {
-      log.info("Пользователь {} найден", userId);
+    log.info("Пользователь {} найден", userId);
 
-      return UserMapper.toUserDto(user.get());
-    }
-
-    throw new EntityNotFoundException("Пользователь не найден");
+    return UserMapper.toUserDto(user);
   }
 
   @Override
@@ -59,27 +52,20 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserDto update(UserDto user) {
-    Optional<User> optionalUser = userRepository.findById(user.getId());
+    User gettedUser = userRepository.findById(user.getId()).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (optionalUser.isPresent()) {
-      User gettedUser = optionalUser.get();
 
-      if (user.getEmail() != null) {
-        gettedUser.setEmail(user.getEmail());
-      }
-
-      if (user.getName() != null) {
-        gettedUser.setName(user.getName());
-      }
-
-      User updatedUser = userRepository.save(gettedUser);
-
-      log.info("Пользователь {} обновлен", user);
-
-      return UserMapper.toUserDto(updatedUser);
+    if (user.getEmail() != null) {
+      gettedUser.setEmail(user.getEmail());
     }
 
-    throw new EntityNotFoundException("Пользователь для обновления не найден");
+    if (user.getName() != null) {
+      gettedUser.setName(user.getName());
+    }
+
+    log.info("Пользователь {} обновлен", user);
+
+    return UserMapper.toUserDto(gettedUser);
   }
 
   @Override

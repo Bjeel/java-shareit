@@ -8,7 +8,7 @@ public interface UserService {
   UserDto create(UserDto user);
 
 
-  UserDto finOne(Long userId);
+  UserDto findOne(Long userId);
 
   List<UserDto> findAll();
 
