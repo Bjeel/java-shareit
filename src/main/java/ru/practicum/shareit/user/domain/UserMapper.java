@@ -22,11 +22,12 @@ public class UserMapper {
       throw new EntityNotFoundException("Пользователь не может быть null");
     }
 
-    return User
-      .builder()
-      .id(user.getId())
-      .name(user.getName())
-      .email(user.getEmail())
-      .build();
+    User targetUser = new User();
+    targetUser.setId(user.getId());
+    targetUser.setEmail(user.getEmail());
+    targetUser.setName(user.getName());
+
+
+    return targetUser;
   }
 }

@@ -1,19 +1,18 @@
 package ru.practicum.shareit.item.domain;
 
+import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.comments.domain.Comment;
+import ru.practicum.shareit.booking.domain.BookingItemDto;
+import ru.practicum.shareit.comments.domain.CommentNewDto;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
-@Entity
-@Table(name = "items")
-public class Item {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Builder
+public class ItemFullDto {
+  @NotNull
   private Long id;
 
   @NotBlank
@@ -28,8 +27,8 @@ public class Item {
   @NotNull
   private Long owner;
 
-  private Long request;
+  private BookingItemDto lastBooking;
+  private BookingItemDto nextBooking;
 
-  @OneToMany
-  private List<Comment> comments;
+  private List<CommentNewDto> comments;
 }

@@ -2,6 +2,9 @@ package ru.practicum.shareit.booking.domain;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.item.domain.Item;
+import ru.practicum.shareit.user.domain.User;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
@@ -9,18 +12,22 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class BookingDto {
+public class BookingFullDto {
+  @NotNull
   Long id;
 
-  Long booker;
+  @NotNull
+  User booker;
 
-  Long itemId;
+  @NotNull
+  Item item;
 
   @FutureOrPresent
-  @NotNull
   LocalDateTime start;
 
   @FutureOrPresent
-  @NotNull
   LocalDateTime end;
+
+  @NotNull
+  Status status;
 }

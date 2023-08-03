@@ -1,6 +1,6 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +14,9 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping(path = "/users")
+@AllArgsConstructor
 public class UserController {
   private final UserService userService;
-
-  @Autowired
-  public UserController(UserService userService) {
-    this.userService = userService;
-  }
 
   @Validated({UserMarker.OnCreate.class})
   @ResponseStatus(HttpStatus.OK)
@@ -29,10 +25,11 @@ public class UserController {
     return userService.create(user);
   }
 
+
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/{userId}")
   public UserDto findOne(@PathVariable Long userId) {
-    return userService.finOne(userId);
+    return userService.findOne(userId);
   }
 
   @ResponseStatus(HttpStatus.OK)

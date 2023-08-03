@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.EmailDuplicateException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.UnavailableAccessException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -20,6 +21,12 @@ public class ErrorHandler {
   @ExceptionHandler
   @ResponseStatus(HttpStatus.CONFLICT)
   public ErrorResponse handleEmailDuplicate(final EmailDuplicateException e) {
+    return new ErrorResponse(e.getMessage());
+  }
+
+  @ExceptionHandler
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleAccessToUnavailableItem(final UnavailableAccessException e) {
     return new ErrorResponse(e.getMessage());
   }
 
