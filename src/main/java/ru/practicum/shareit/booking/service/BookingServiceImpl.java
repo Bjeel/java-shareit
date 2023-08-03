@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
@@ -17,6 +18,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +28,12 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 @Slf4j
+@Transactional
 public class BookingServiceImpl implements BookingService {
 
-  BookingRepository bookingRepository;
-  ItemRepository itemRepository;
-  UserRepository userRepository;
+  private final BookingRepository bookingRepository;
+  private final ItemRepository itemRepository;
+  private final UserRepository userRepository;
 
   @Override
   public BookingFullDto create(BookingDto bookingDto) {
@@ -76,7 +79,7 @@ public class BookingServiceImpl implements BookingService {
     booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
 
     log.info("{} аренда подтверждена", booking);
-    return BookingMapper.toFullDto(bookingRepository.save(booking));
+    return BookingMapper.toFullDto(booking);
   }
 
   @Override
@@ -92,8 +95,13 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public List<BookingFullDto> findAllByState(String st, Long userId) {
+  public List<BookingFullDto> findAllByState(String st, Long userId, int from, int size) {
+    if (from < 0 || size < 0) {
+      throw new UnavailableAccessException("Не верные параметры пагинации");
+    }
+
     State state;
+    PageRequest page = PageRequest.of(from / size, size);
 
     try {
       state = State.valueOf(st);
@@ -107,24 +115,24 @@ public class BookingServiceImpl implements BookingService {
 
     switch (state) {
       case ALL:
-        bookings = bookingRepository.findAllByBookerOrderByStartDesc(user);
+        bookings = bookingRepository.findAllByBookerOrderByStartDesc(page, user);
         break;
       case PAST:
-        bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(user, LocalDateTime.now());
+        bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(page, user, LocalDateTime.now());
         break;
       case FUTURE:
-        bookings = bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(user, LocalDateTime.now());
+        bookings = bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(page, user, LocalDateTime.now());
         break;
       case WAITING:
-        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.WAITING);
+        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(page, user, Status.WAITING);
         break;
       case REJECTED:
-        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.REJECTED);
+        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(page, user, Status.REJECTED);
         break;
       case CURRENT:
         LocalDateTime dateTime = LocalDateTime.now();
 
-        bookings = bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime, dateTime);
+        bookings = bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(page, user, dateTime, dateTime);
         break;
 
       default:
@@ -137,8 +145,14 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public List<BookingFullDto> findAllByStateForOwner(String st, Long userId) {
+  public List<BookingFullDto> findAllByStateForOwner(String st, Long userId, int from, int size) {
+    if (from < 0 || size < 0) {
+      throw new UnavailableAccessException("Не верные параметры пагинации");
+    }
+
     State state;
+
+    PageRequest page = PageRequest.of(from / size, size);
 
     try {
       state = State.valueOf(st);
@@ -152,24 +166,24 @@ public class BookingServiceImpl implements BookingService {
 
     switch (state) {
       case ALL:
-        bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(user.getId());
+        bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(page, user.getId());
         break;
       case PAST:
-        bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(user.getId(), LocalDateTime.now());
+        bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(page, user.getId(), LocalDateTime.now());
         break;
       case FUTURE:
-        bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(user.getId(), LocalDateTime.now());
+        bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(page, user.getId(), LocalDateTime.now());
         break;
       case WAITING:
-        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.WAITING);
+        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(page, user.getId(), Status.WAITING);
         break;
       case REJECTED:
-        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.REJECTED);
+        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(page, user.getId(), Status.REJECTED);
         break;
       case CURRENT: {
         LocalDateTime dateTime = LocalDateTime.now();
 
-        bookings = bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(user.getId(), dateTime, dateTime);
+        bookings = bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(page, user.getId(), dateTime, dateTime);
         break;
       }
 

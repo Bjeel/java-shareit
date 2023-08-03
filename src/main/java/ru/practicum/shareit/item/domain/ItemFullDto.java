@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.booking.domain.BookingItemDto;
 import ru.practicum.shareit.comments.domain.CommentNewDto;
+import ru.practicum.shareit.request.domain.ItemRequestDto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -31,4 +32,6 @@ public class ItemFullDto {
   private BookingItemDto nextBooking;
 
   private List<CommentNewDto> comments;
+
+  private List<ItemRequestDto> request;
 }

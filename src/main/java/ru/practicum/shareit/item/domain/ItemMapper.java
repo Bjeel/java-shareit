@@ -1,10 +1,14 @@
 package ru.practicum.shareit.item.domain;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.comments.domain.CommentMapper;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.request.domain.ItemRequestMapper;
 
 import java.util.stream.Collectors;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {
   public static ItemDto toItemDto(Item item) {
     if (item == null) {
@@ -18,6 +22,7 @@ public class ItemMapper {
       .description(item.getDescription())
       .available(item.getAvailable())
       .owner(item.getOwner())
+      .requestId(item.getRequestId())
       .build();
   }
 
@@ -33,12 +38,13 @@ public class ItemMapper {
     newItem.setName(item.getName());
     newItem.setDescription(item.getDescription());
     newItem.setOwner(item.getOwner());
-    newItem.setRequest(newItem.getRequest());
+    newItem.setRequestId(item.getRequestId());
 
     return newItem;
   }
 
   public static ItemFullDto toItemBookingsDto(Item item) {
+
     return ItemFullDto
       .builder()
       .id(item.getId())
@@ -49,6 +55,7 @@ public class ItemMapper {
       .lastBooking(null)
       .nextBooking(null)
       .comments(item.getComments().stream().map(CommentMapper::toCommentNewDto).collect(Collectors.toList()))
+      .request(item.getRequest().stream().map(ItemRequestMapper::toDto).collect(Collectors.toList()))
       .build();
   }
 

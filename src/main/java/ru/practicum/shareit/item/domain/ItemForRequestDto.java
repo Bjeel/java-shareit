@@ -1,14 +1,10 @@
 package ru.practicum.shareit.item.domain;
 
-import lombok.Builder;
-import lombok.Data;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@Data
-@Builder
-public class ItemDto {
+public class ItemForRequestDto {
+  @NotNull
   private Long id;
 
   @NotBlank(groups = ItemMarker.OnCreate.class)
@@ -21,6 +17,4 @@ public class ItemDto {
   private Boolean available;
 
   private Long owner;
-
-  private Long requestId;
 }

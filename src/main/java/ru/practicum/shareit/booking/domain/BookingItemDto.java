@@ -9,11 +9,11 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class BookingItemDto {
   @NotNull
-  Long id;
+  private Long id;
 
   @NotNull
-  Long bookerId;
+  private Long bookerId;
 
   @NotNull
-  Long itemId;
+  private Long itemId;
 }

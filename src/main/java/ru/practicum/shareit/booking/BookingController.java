@@ -31,8 +31,10 @@ public class BookingController {
 
   @GetMapping
   public List<BookingFullDto> findAll(@NotNull @RequestHeader(Headers.USER_ID) Long userId,
-                                      @NotNull @RequestParam(required = true, defaultValue = "ALL", name = "state") String state) {
-    return bookingService.findAllByState(state, userId);
+                                      @NotNull @RequestParam(defaultValue = "ALL", name = "state") String state,
+                                      @RequestParam(defaultValue = "0", required = false, name = "from") int from,
+                                      @RequestParam(defaultValue = "10", required = false, name = "size") int size) {
+    return bookingService.findAllByState(state, userId, from, size);
   }
 
   @GetMapping("/{id}")
@@ -42,8 +44,11 @@ public class BookingController {
 
   @GetMapping("/owner")
   public List<BookingFullDto> findAllByOwner(@NotNull @RequestHeader(Headers.USER_ID) Long userId,
-                                             @NotNull @RequestParam(required = true, defaultValue = "ALL", name = "state") String state) {
-    return bookingService.findAllByStateForOwner(state, userId);
+                                             @NotNull @RequestParam(defaultValue = "ALL", name = "state") String state,
+                                             @RequestParam(defaultValue = "0", required = false, name = "from") int from,
+                                             @RequestParam(defaultValue = "10", required = false, name = "size") int size) {
+
+    return bookingService.findAllByStateForOwner(state, userId, from, size);
   }
 
   @PatchMapping("/{id}")
