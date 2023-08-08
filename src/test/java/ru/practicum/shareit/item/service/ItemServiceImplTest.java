@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.domain.Item;
 import ru.practicum.shareit.item.domain.ItemDto;
 import ru.practicum.shareit.item.domain.ItemFullDto;
@@ -21,6 +22,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +33,8 @@ class ItemServiceImplTest {
   private ItemRepository itemRepository;
   @Mock
   private UserRepository userRepository;
+  @Mock
+  private BookingRepository bookingRepository;
 
   @InjectMocks
   private ItemServiceImpl itemService;
@@ -82,6 +86,8 @@ class ItemServiceImplTest {
   void findAll() {
     when(itemRepository.findAllByOwner(user.getId()))
       .thenReturn(List.of(item));
+    when(bookingRepository.findAllByItem(any()))
+      .thenReturn(List.of());
 
     List<ItemFullDto> savedItems = itemService.findAll(user.getId());
 
