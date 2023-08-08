@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.comments.domain.Comment;
 import ru.practicum.shareit.request.domain.ItemRequest;
 
@@ -12,6 +15,9 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "items")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Item {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
