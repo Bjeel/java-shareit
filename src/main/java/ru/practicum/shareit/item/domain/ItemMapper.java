@@ -54,8 +54,8 @@ public class ItemMapper {
       .owner(item.getOwner())
       .lastBooking(null)
       .nextBooking(null)
-      .comments(item.getComments().stream().map(CommentMapper::toCommentNewDto).collect(Collectors.toList()))
-      .request(item.getRequest().stream().map(ItemRequestMapper::toDto).collect(Collectors.toList()))
+      .comments(item.getComments() == null ? null : item.getComments().stream().map(CommentMapper::toCommentNewDto).collect(Collectors.toList()))
+      .request(item.getRequest() == null ? null : item.getRequest().stream().map(ItemRequestMapper::toDto).collect(Collectors.toList()))
       .build();
   }
 

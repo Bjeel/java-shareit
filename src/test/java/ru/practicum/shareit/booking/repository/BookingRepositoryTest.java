@@ -1,9 +1,11 @@
 package ru.practicum.shareit.booking.repository;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DataJpaTest
 class BookingRepositoryTest {
 
   @Test
@@ -52,5 +54,53 @@ class BookingRepositoryTest {
 
   @Test
   void findTopByItemAndBookerAndStartIsBeforeOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByBookerOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByBookerAndStartAfterOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByItemOwnerOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByItemOwnerAndStartAfterOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByItem() {
+  }
+
+  @Test
+  void testFindAllByBookerAndStatusOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByBookerAndEndBeforeOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByItemOwnerAndStatusOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByItemOwnerAndEndBeforeOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc() {
+  }
+
+  @Test
+  void testFindTopByItemAndBookerAndStartIsBeforeOrderByStartDesc() {
   }
 }

@@ -45,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
 
     User user = userRepository.findById(bookingDto.getBooker()).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (user.getId().equals(item.getId())) {
+    if (user.getId().equals(item.getOwner())) {
       throw new EntityNotFoundException("Нельзя арендовать у самого себя");
     }
 
