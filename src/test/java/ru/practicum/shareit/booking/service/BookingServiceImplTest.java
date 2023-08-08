@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.domain.Booking;
 import ru.practicum.shareit.booking.domain.BookingDto;
@@ -21,12 +22,15 @@ import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,6 +86,9 @@ class BookingServiceImplTest {
     booking.setItem(item);
     booking.setId(1L);
     booking.setBooker(user);
+    booking.setStatus(Status.WAITING);
+    booking.setStart(LocalDateTime.parse("2025-08-03T13:26:59"));
+    booking.setEnd(LocalDateTime.parse("2025-08-04T13:26:59"));
   }
 
   @Test
@@ -248,8 +255,6 @@ class BookingServiceImplTest {
 
   @Test
   void approveBooking() {
-    booking.setStatus(Status.WAITING);
-
     when(bookingRepository.findById(1L)).thenReturn(Optional.ofNullable(booking));
 
     bookingFullDto = bookingService.approve(1L, true, 2L);
@@ -277,8 +282,6 @@ class BookingServiceImplTest {
 
   @Test
   void findById() {
-    booking.setStatus(Status.WAITING);
-
     when(bookingRepository.findById(1L)).thenReturn(Optional.ofNullable(booking));
 
     bookingFullDto = bookingService.findById(1L, 2L);
@@ -291,5 +294,288 @@ class BookingServiceImplTest {
     assertThat(bookingFullDto.getEnd(), is(bookingFullDto.getEnd()));
 
     verify(bookingRepository).findById(1L);
+  }
+
+  @Test
+  void findAllByStateWithWrongFromPaginationForOwner() {
+    assertThrows(
+      UnavailableAccessException.class,
+      () -> bookingService.findAllByStateForOwner(State.ALL.name(), 3L, -1, 10));
+  }
+
+  @Test
+  void findAllByStateWithWrongSizePaginationForOwner() {
+    assertThrows(
+      UnavailableAccessException.class,
+      () -> bookingService.findAllByStateForOwner(State.ALL.name(), 3L, 0, -1));
+  }
+
+  @Test
+  void findAllByStateWithWrongStateForOwner() {
+    assertThrows(
+      RuntimeException.class,
+      () -> bookingService.findAllByStateForOwner("abr", 3L, 0, 20));
+  }
+
+  @Test
+  void findAllByAllStateForOwner() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByItemOwnerOrderByStartDesc(any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.ALL.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByItemOwnerOrderByStartDesc(any(), any());
+  }
+
+  @Test
+  void findAllByPastStateForOwner() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.PAST.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByItemOwnerAndEndBeforeOrderByStartDesc(any(), any(), any());
+  }
+
+  @Test
+  void findAllByFutureStateForOwner() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.FUTURE.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByItemOwnerAndStartAfterOrderByStartDesc(any(), any(), any());
+  }
+
+  @Test
+  void findAllByWaitingStateForOwner() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.WAITING.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByItemOwnerAndStatusOrderByStartDesc(any(), any(), any());
+  }
+
+  @Test
+  void findAllByRejectedStateForOwner() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.REJECTED.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByItemOwnerAndStatusOrderByStartDesc(any(), any(), any());
+  }
+
+  @Test
+  void findAllByCurrentStateForOwner() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.CURRENT.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
+  }
+
+  // ДЛЯ ОБЫЧНОГО ПОЛЬЗОВАТЕЛЯ
+  @Test
+  void findAllByStateWithWrongFromPagination() {
+    assertThrows(
+      UnavailableAccessException.class,
+      () -> bookingService.findAllByState(State.ALL.name(), 3L, -1, 10));
+  }
+
+  @Test
+  void findAllByStateWithWrongSizePagination() {
+    assertThrows(
+      UnavailableAccessException.class,
+      () -> bookingService.findAllByState(State.ALL.name(), 3L, 0, -1));
+  }
+
+  @Test
+  void findAllByStateWithWrongState() {
+    assertThrows(
+      RuntimeException.class,
+      () -> bookingService.findAllByState("abr", 3L, 0, 20));
+  }
+
+  @Test
+  void findAllByAllState() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByBookerOrderByStartDesc(any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.ALL.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByBookerOrderByStartDesc(any(), any());
+  }
+
+  @Test
+  void findAllByPastState() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.PAST.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByBookerAndEndBeforeOrderByStartDesc(any(), any(), any());
+  }
+
+  @Test
+  void findAllByFutureState() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.FUTURE.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByBookerAndStartAfterOrderByStartDesc(any(), any(), any());
+  }
+
+  @Test
+  void findAllByWaitingState() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByBookerAndStatusOrderByStartDesc(any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.WAITING.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByBookerAndStatusOrderByStartDesc(any(), any(), any());
+  }
+
+  @Test
+  void findAllByRejectedState() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByBookerAndStatusOrderByStartDesc(any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.REJECTED.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByBookerAndStatusOrderByStartDesc(any(), any(), any());
+  }
+
+  @Test
+  void findAllByCurrentState() {
+    when(userRepository.findById(1L))
+      .thenReturn(Optional.ofNullable(user));
+    when(bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
+      .thenReturn(List.of(booking));
+
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.CURRENT.name(), 1L, 0, 20);
+
+    assertThat(savedBookings, notNullValue());
+    assertThat(savedBookings, hasSize(1));
+    assertThat(savedBookings.get(0).getBooker(), notNullValue());
+    assertThat(savedBookings.get(0).getStatus(), is(Status.WAITING));
+    assertThat(savedBookings.get(0).getStart(), is(bookingDto.getStart()));
+    assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
+
+    verify(userRepository).findById(1L);
+    verify(bookingRepository).findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any());
   }
 }
