@@ -12,17 +12,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.practicum.shareit.booking.domain.BookingDto;
 import ru.practicum.shareit.booking.domain.BookingFullDto;
-import ru.practicum.shareit.booking.domain.BookingItemDto;
+
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.comments.domain.CommentDto;
-import ru.practicum.shareit.comments.domain.CommentNewDto;
+
 import ru.practicum.shareit.consts.Headers;
-import ru.practicum.shareit.item.domain.ItemDto;
-import ru.practicum.shareit.item.domain.ItemFullDto;
-import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.request.domain.ItemRequestDto;
-import ru.practicum.shareit.user.domain.User;
-import ru.practicum.shareit.user.domain.UserDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -30,7 +23,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;

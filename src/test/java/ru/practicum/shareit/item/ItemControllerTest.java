@@ -18,9 +18,6 @@ import ru.practicum.shareit.item.domain.ItemDto;
 import ru.practicum.shareit.item.domain.ItemFullDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.domain.ItemRequestDto;
-import ru.practicum.shareit.user.UserController;
-import ru.practicum.shareit.user.domain.UserDto;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -28,7 +25,6 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
