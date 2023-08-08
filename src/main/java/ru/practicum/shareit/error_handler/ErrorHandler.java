@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exception.EmailDuplicateException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.UnavailableAccessException;
 
@@ -15,12 +14,6 @@ public class ErrorHandler {
   @ExceptionHandler
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ErrorResponse handleUserNotFound(final EntityNotFoundException e) {
-    return new ErrorResponse(e.getMessage());
-  }
-
-  @ExceptionHandler
-  @ResponseStatus(HttpStatus.CONFLICT)
-  public ErrorResponse handleEmailDuplicate(final EmailDuplicateException e) {
     return new ErrorResponse(e.getMessage());
   }
 
