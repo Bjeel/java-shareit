@@ -101,7 +101,7 @@ class ItemServiceImplTest {
 
     verify(itemRepository).findAllByOwner(user.getId());
   }
-  
+
   @Test
   void update() {
     itemDto.setAvailable(false);
