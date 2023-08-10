@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.domain.Booking;
@@ -18,7 +19,6 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +82,7 @@ public class BookingServiceImpl implements BookingService {
     return BookingMapper.toFullDto(booking);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public BookingFullDto findById(Long id, Long userId) {
     Booking booking = bookingRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Аренда не найдена"));
@@ -94,12 +95,9 @@ public class BookingServiceImpl implements BookingService {
     return BookingMapper.toFullDto(booking);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<BookingFullDto> findAllByState(String st, Long userId, int from, int size) {
-    if (from < 0 || size < 0) {
-      throw new UnavailableAccessException("Не верные параметры пагинации");
-    }
-
     State state;
     PageRequest page = PageRequest.of(from / size, size);
 
@@ -144,12 +142,9 @@ public class BookingServiceImpl implements BookingService {
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<BookingFullDto> findAllByStateForOwner(String st, Long userId, int from, int size) {
-    if (from < 0 || size < 0) {
-      throw new UnavailableAccessException("Не верные параметры пагинации");
-    }
-
     State state;
 
     PageRequest page = PageRequest.of(from / size, size);

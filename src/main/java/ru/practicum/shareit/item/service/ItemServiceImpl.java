@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.domain.Booking;
 import ru.practicum.shareit.booking.domain.BookingMapper;
@@ -22,7 +23,6 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,6 +49,7 @@ public class ItemServiceImpl implements ItemService {
     return ItemMapper.toItemDto(createdItem);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public ItemFullDto findOne(Long itemId, Long userId) {
     Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Предмет не найден"));
@@ -68,6 +69,7 @@ public class ItemServiceImpl implements ItemService {
 
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<ItemFullDto> findAll(Long userId) {
     List<Item> items = itemRepository.findAllByOwner(userId);
@@ -89,9 +91,10 @@ public class ItemServiceImpl implements ItemService {
       .collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<ItemDto> search(String text) {
-    if (text != null && text.isBlank()) {
+    if (text.isBlank()) {
       return new ArrayList<>();
     }
 

@@ -57,7 +57,7 @@ public class ItemController {
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/search")
-  public List<ItemDto> findAllBySearch(@NotNull @RequestParam(required = true) String text) {
+  public List<ItemDto> search(@NotNull @RequestParam String text) {
     return itemService.search(text);
   }
 
