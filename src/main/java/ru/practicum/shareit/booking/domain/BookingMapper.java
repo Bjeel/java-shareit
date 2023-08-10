@@ -1,9 +1,12 @@
 package ru.practicum.shareit.booking.domain;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.domain.Item;
 import ru.practicum.shareit.user.domain.User;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookingMapper {
   public static Booking toBooking(BookingDto bookingNewDto, Item item, User user) {
     Booking booking = new Booking();

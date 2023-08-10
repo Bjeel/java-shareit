@@ -2,7 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.domain.Booking;
@@ -26,11 +28,12 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 @Slf4j
+@Transactional
 public class BookingServiceImpl implements BookingService {
 
-  BookingRepository bookingRepository;
-  ItemRepository itemRepository;
-  UserRepository userRepository;
+  private final BookingRepository bookingRepository;
+  private final ItemRepository itemRepository;
+  private final UserRepository userRepository;
 
   @Override
   public BookingFullDto create(BookingDto bookingDto) {
@@ -42,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
 
     User user = userRepository.findById(bookingDto.getBooker()).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-    if (user.getId().equals(item.getId())) {
+    if (user.getId().equals(item.getOwner())) {
       throw new EntityNotFoundException("Нельзя арендовать у самого себя");
     }
 
@@ -76,9 +79,10 @@ public class BookingServiceImpl implements BookingService {
     booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
 
     log.info("{} аренда подтверждена", booking);
-    return BookingMapper.toFullDto(bookingRepository.save(booking));
+    return BookingMapper.toFullDto(booking);
   }
 
+  @Transactional(readOnly = true)
   @Override
   public BookingFullDto findById(Long id, Long userId) {
     Booking booking = bookingRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Аренда не найдена"));
@@ -91,9 +95,11 @@ public class BookingServiceImpl implements BookingService {
     return BookingMapper.toFullDto(booking);
   }
 
+  @Transactional(readOnly = true)
   @Override
-  public List<BookingFullDto> findAllByState(String st, Long userId) {
+  public List<BookingFullDto> findAllByState(String st, Long userId, int from, int size) {
     State state;
+    PageRequest page = PageRequest.of(from / size, size);
 
     try {
       state = State.valueOf(st);
@@ -107,24 +113,24 @@ public class BookingServiceImpl implements BookingService {
 
     switch (state) {
       case ALL:
-        bookings = bookingRepository.findAllByBookerOrderByStartDesc(user);
+        bookings = bookingRepository.findAllByBookerOrderByStartDesc(page, user);
         break;
       case PAST:
-        bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(user, LocalDateTime.now());
+        bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(page, user, LocalDateTime.now());
         break;
       case FUTURE:
-        bookings = bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(user, LocalDateTime.now());
+        bookings = bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(page, user, LocalDateTime.now());
         break;
       case WAITING:
-        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.WAITING);
+        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(page, user, Status.WAITING);
         break;
       case REJECTED:
-        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(user, Status.REJECTED);
+        bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(page, user, Status.REJECTED);
         break;
       case CURRENT:
         LocalDateTime dateTime = LocalDateTime.now();
 
-        bookings = bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime, dateTime);
+        bookings = bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(page, user, dateTime, dateTime);
         break;
 
       default:
@@ -136,9 +142,12 @@ public class BookingServiceImpl implements BookingService {
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   @Override
-  public List<BookingFullDto> findAllByStateForOwner(String st, Long userId) {
+  public List<BookingFullDto> findAllByStateForOwner(String st, Long userId, int from, int size) {
     State state;
+
+    PageRequest page = PageRequest.of(from / size, size);
 
     try {
       state = State.valueOf(st);
@@ -152,24 +161,24 @@ public class BookingServiceImpl implements BookingService {
 
     switch (state) {
       case ALL:
-        bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(user.getId());
+        bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(page, user.getId());
         break;
       case PAST:
-        bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(user.getId(), LocalDateTime.now());
+        bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(page, user.getId(), LocalDateTime.now());
         break;
       case FUTURE:
-        bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(user.getId(), LocalDateTime.now());
+        bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(page, user.getId(), LocalDateTime.now());
         break;
       case WAITING:
-        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.WAITING);
+        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(page, user.getId(), Status.WAITING);
         break;
       case REJECTED:
-        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(user.getId(), Status.REJECTED);
+        bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(page, user.getId(), Status.REJECTED);
         break;
       case CURRENT: {
         LocalDateTime dateTime = LocalDateTime.now();
 
-        bookings = bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(user.getId(), dateTime, dateTime);
+        bookings = bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(page, user.getId(), dateTime, dateTime);
         break;
       }
 

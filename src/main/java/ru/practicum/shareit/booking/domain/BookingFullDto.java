@@ -14,20 +14,20 @@ import java.time.LocalDateTime;
 @Builder
 public class BookingFullDto {
   @NotNull
-  Long id;
+  private Long id;
 
   @NotNull
-  User booker;
+  private User booker;
 
   @NotNull
-  Item item;
+  private Item item;
 
   @FutureOrPresent
-  LocalDateTime start;
+  private LocalDateTime start;
 
   @FutureOrPresent
-  LocalDateTime end;
+  private LocalDateTime end;
 
   @NotNull
-  Status status;
+  private Status status;
 }
