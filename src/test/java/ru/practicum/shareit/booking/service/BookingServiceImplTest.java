@@ -299,14 +299,14 @@ class BookingServiceImplTest {
   @Test
   void findAllByStateWithWrongFromPaginationForOwner() {
     assertThrows(
-      UnavailableAccessException.class,
+      EntityNotFoundException.class,
       () -> bookingService.findAllByStateForOwner(State.ALL.name(), 3L, -1, 10));
   }
 
   @Test
   void findAllByStateWithWrongSizePaginationForOwner() {
     assertThrows(
-      UnavailableAccessException.class,
+      IllegalArgumentException.class,
       () -> bookingService.findAllByStateForOwner(State.ALL.name(), 3L, 0, -1));
   }
 
@@ -441,14 +441,14 @@ class BookingServiceImplTest {
   @Test
   void findAllByStateWithWrongFromPagination() {
     assertThrows(
-      UnavailableAccessException.class,
+      EntityNotFoundException.class,
       () -> bookingService.findAllByState(State.ALL.name(), 3L, -1, 10));
   }
 
   @Test
   void findAllByStateWithWrongSizePagination() {
     assertThrows(
-      UnavailableAccessException.class,
+      IllegalArgumentException.class,
       () -> bookingService.findAllByState(State.ALL.name(), 3L, 0, -1));
   }
 
