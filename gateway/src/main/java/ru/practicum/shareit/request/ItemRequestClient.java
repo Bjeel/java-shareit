@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.request.domain.ItemRequestDto;
-import ru.practicum.shareit.user.domain.UserDto;
 
 import java.util.Map;
 

@@ -10,18 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.consts.Headers;
 import ru.practicum.shareit.request.domain.ItemRequestDto;
 import ru.practicum.shareit.request.domain.ItemRequestMarker;
-import ru.practicum.shareit.user.UserClient;
-import ru.practicum.shareit.user.domain.UserDto;
-import ru.practicum.shareit.user.domain.UserMarker;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-
 
 @Controller
 @RequestMapping(path = "/requests")
