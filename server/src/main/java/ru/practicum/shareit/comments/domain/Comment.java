@@ -26,6 +26,7 @@ public class Comment {
   private String text;
 
   @NotNull
+  @Column(name = "item")
   private Long itemId;
 
   @OneToOne

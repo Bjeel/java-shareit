@@ -39,8 +39,10 @@ public class Item {
   private Long requestId;
 
   @OneToMany
+  @JoinColumn(name = "id")
   private List<Comment> comments;
 
   @OneToMany
+  @JoinColumn(name = "id")
   private List<ItemRequest> request;
 }
