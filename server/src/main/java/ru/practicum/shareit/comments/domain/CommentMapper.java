@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {
@@ -21,7 +22,7 @@ public class CommentMapper {
     Comment comment = new Comment();
 
     comment.setText(commentDto.getText());
-    comment.setCreated(LocalDateTime.now());
+    comment.setCreated(LocalDateTime.now().truncatedTo(ChronoUnit.NANOS));
 
     return comment;
   }

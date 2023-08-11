@@ -300,21 +300,14 @@ class BookingServiceImplTest {
   void findAllByStateWithWrongFromPaginationForOwner() {
     assertThrows(
       EntityNotFoundException.class,
-      () -> bookingService.findAllByStateForOwner(State.ALL.name(), 3L, -1, 10));
+      () -> bookingService.findAllByStateForOwner(State.ALL, 3L, -1, 10));
   }
 
   @Test
   void findAllByStateWithWrongSizePaginationForOwner() {
     assertThrows(
       IllegalArgumentException.class,
-      () -> bookingService.findAllByStateForOwner(State.ALL.name(), 3L, 0, -1));
-  }
-
-  @Test
-  void findAllByStateWithWrongStateForOwner() {
-    assertThrows(
-      RuntimeException.class,
-      () -> bookingService.findAllByStateForOwner("abr", 3L, 0, 20));
+      () -> bookingService.findAllByStateForOwner(State.ALL, 3L, 0, -1));
   }
 
   @Test
@@ -324,7 +317,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByItemOwnerOrderByStartDesc(any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.ALL.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.ALL, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -344,7 +337,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.PAST.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.PAST, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -364,7 +357,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.FUTURE.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.FUTURE, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -384,7 +377,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.WAITING.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.WAITING, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -404,7 +397,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.REJECTED.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.REJECTED, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -424,7 +417,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.CURRENT.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByStateForOwner(State.CURRENT, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -442,21 +435,14 @@ class BookingServiceImplTest {
   void findAllByStateWithWrongFromPagination() {
     assertThrows(
       EntityNotFoundException.class,
-      () -> bookingService.findAllByState(State.ALL.name(), 3L, -1, 10));
+      () -> bookingService.findAllByState(State.ALL, 3L, -1, 10));
   }
 
   @Test
   void findAllByStateWithWrongSizePagination() {
     assertThrows(
       IllegalArgumentException.class,
-      () -> bookingService.findAllByState(State.ALL.name(), 3L, 0, -1));
-  }
-
-  @Test
-  void findAllByStateWithWrongState() {
-    assertThrows(
-      RuntimeException.class,
-      () -> bookingService.findAllByState("abr", 3L, 0, 20));
+      () -> bookingService.findAllByState(State.ALL, 3L, 0, -1));
   }
 
   @Test
@@ -466,7 +452,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByBookerOrderByStartDesc(any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.ALL.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.ALL, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -486,7 +472,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.PAST.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.PAST, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -503,10 +489,10 @@ class BookingServiceImplTest {
   void findAllByFutureState() {
     when(userRepository.findById(1L))
       .thenReturn(Optional.ofNullable(user));
-    when(bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(any(), any(), any()))
+    when(bookingRepository.findAllByBookerAndStartAfterOrderByEndDesc(any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.FUTURE.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.FUTURE, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -516,7 +502,7 @@ class BookingServiceImplTest {
     assertThat(savedBookings.get(0).getEnd(), is(bookingDto.getEnd()));
 
     verify(userRepository).findById(1L);
-    verify(bookingRepository).findAllByBookerAndStartAfterOrderByStartDesc(any(), any(), any());
+    verify(bookingRepository).findAllByBookerAndStartAfterOrderByEndDesc(any(), any(), any());
   }
 
   @Test
@@ -526,7 +512,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByBookerAndStatusOrderByStartDesc(any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.WAITING.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.WAITING, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -546,7 +532,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByBookerAndStatusOrderByStartDesc(any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.REJECTED.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.REJECTED, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));
@@ -566,7 +552,7 @@ class BookingServiceImplTest {
     when(bookingRepository.findAllByBookerAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
       .thenReturn(List.of(booking));
 
-    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.CURRENT.name(), 1L, 0, 20);
+    List<BookingFullDto> savedBookings = bookingService.findAllByState(State.CURRENT, 1L, 0, 20);
 
     assertThat(savedBookings, notNullValue());
     assertThat(savedBookings, hasSize(1));

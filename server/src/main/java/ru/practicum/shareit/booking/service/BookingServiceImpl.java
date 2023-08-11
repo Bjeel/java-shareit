@@ -20,6 +20,7 @@ import ru.practicum.shareit.user.domain.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -97,15 +98,8 @@ public class BookingServiceImpl implements BookingService {
 
   @Transactional(readOnly = true)
   @Override
-  public List<BookingFullDto> findAllByState(String st, Long userId, int from, int size) {
-    State state;
+  public List<BookingFullDto> findAllByState(State state, Long userId, int from, int size) {
     PageRequest page = PageRequest.of(from / size, size);
-
-    try {
-      state = State.valueOf(st);
-    } catch (IllegalArgumentException e) {
-      throw new RuntimeException("Unknown state: " + st);
-    }
 
     User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
@@ -116,10 +110,10 @@ public class BookingServiceImpl implements BookingService {
         bookings = bookingRepository.findAllByBookerOrderByStartDesc(page, user);
         break;
       case PAST:
-        bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(page, user, LocalDateTime.now());
+        bookings = bookingRepository.findAllByBookerAndEndBeforeOrderByStartDesc(page, user, LocalDateTime.now().truncatedTo(ChronoUnit.NANOS));
         break;
       case FUTURE:
-        bookings = bookingRepository.findAllByBookerAndStartAfterOrderByStartDesc(page, user, LocalDateTime.now());
+        bookings = bookingRepository.findAllByBookerAndStartAfterOrderByEndDesc(page, user, LocalDateTime.now().truncatedTo(ChronoUnit.NANOS));
         break;
       case WAITING:
         bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(page, user, Status.WAITING);
@@ -137,23 +131,15 @@ public class BookingServiceImpl implements BookingService {
         bookings = new ArrayList<>();
     }
 
-    log.info("Получение аренд по состоянию для {}, для пользователя {}", st, user);
+    log.info("Получение аренд по состоянию для {}, для пользователя {}", state, user);
 
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
   @Override
-  public List<BookingFullDto> findAllByStateForOwner(String st, Long userId, int from, int size) {
-    State state;
-
+  public List<BookingFullDto> findAllByStateForOwner(State state, Long userId, int from, int size) {
     PageRequest page = PageRequest.of(from / size, size);
-
-    try {
-      state = State.valueOf(st);
-    } catch (IllegalArgumentException e) {
-      throw new RuntimeException("Unknown state: " + st);
-    }
 
     User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
@@ -164,10 +150,10 @@ public class BookingServiceImpl implements BookingService {
         bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(page, user.getId());
         break;
       case PAST:
-        bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(page, user.getId(), LocalDateTime.now());
+        bookings = bookingRepository.findAllByItemOwnerAndEndBeforeOrderByStartDesc(page, user.getId(), LocalDateTime.now().truncatedTo(ChronoUnit.NANOS));
         break;
       case FUTURE:
-        bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(page, user.getId(), LocalDateTime.now());
+        bookings = bookingRepository.findAllByItemOwnerAndStartAfterOrderByStartDesc(page, user.getId(), LocalDateTime.now().truncatedTo(ChronoUnit.NANOS));
         break;
       case WAITING:
         bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(page, user.getId(), Status.WAITING);
@@ -176,7 +162,7 @@ public class BookingServiceImpl implements BookingService {
         bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(page, user.getId(), Status.REJECTED);
         break;
       case CURRENT: {
-        LocalDateTime dateTime = LocalDateTime.now();
+        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.NANOS);
 
         bookings = bookingRepository.findAllByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(page, user.getId(), dateTime, dateTime);
         break;
@@ -186,7 +172,7 @@ public class BookingServiceImpl implements BookingService {
         bookings = new ArrayList<>();
     }
 
-    log.info("Получение аренд по состоянию для {}, для владельца {}", st, user);
+    log.info("Получение аренд по состоянию для {}, для владельца {}", state, user);
     return bookings.stream().map(BookingMapper::toFullDto).collect(Collectors.toList());
   }
 }

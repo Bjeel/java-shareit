@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Validated
@@ -27,7 +28,7 @@ public class ItemRequestController {
   @PostMapping
   public ItemRequestDto crete(@NotNull @RequestBody ItemRequestDto itemRequestDto, @NotNull @RequestHeader(Headers.USER_ID) Long userId) {
     itemRequestDto.setRequester(userId);
-    itemRequestDto.setCreated(LocalDateTime.now());
+    itemRequestDto.setCreated(LocalDateTime.now().truncatedTo(ChronoUnit.NANOS));
 
     return itemRequestService.create(itemRequestDto);
   }

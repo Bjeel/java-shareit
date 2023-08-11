@@ -107,7 +107,7 @@ class BookingControllerTest {
 
   @Test
   void findAll() throws Exception {
-    when(bookingService.findAllByState(anyString(), anyLong(), anyInt(), anyInt()))
+    when(bookingService.findAllByState(any(), anyLong(), anyInt(), anyInt()))
       .thenReturn(List.of(bookingFullDto));
 
     mvc.perform(get("/bookings")
@@ -144,7 +144,7 @@ class BookingControllerTest {
 
   @Test
   void findAllByOwner() throws Exception {
-    when(bookingService.findAllByStateForOwner(anyString(), anyLong(), anyInt(), anyInt()))
+    when(bookingService.findAllByStateForOwner(any(), anyLong(), anyInt(), anyInt()))
       .thenReturn(List.of(bookingFullDto));
 
     mvc.perform(get("/bookings/owner")

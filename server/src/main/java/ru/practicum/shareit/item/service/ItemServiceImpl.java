@@ -25,6 +25,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
   @Transactional(readOnly = true)
   @Override
   public List<ItemFullDto> findAll(Long userId) {
-    List<Item> items = itemRepository.findAllByOwner(userId);
+    List<Item> items = itemRepository.findAllByOwnerOrderByIdAsc(userId);
 
     log.info("Получение всех предметов пользователя {}", userId);
 
@@ -134,7 +135,7 @@ public class ItemServiceImpl implements ItemService {
 
     Booking booking = bookingRepository.findTopByItemAndBookerAndStartIsBeforeOrderByStartDesc(item,
       user,
-      LocalDateTime.now()
+      LocalDateTime.now().truncatedTo(ChronoUnit.NANOS)
     ).orElseThrow(() -> new UnavailableAccessException("Аренда не найдена"));
 
     if (!booking.getStatus().equals(Status.APPROVED)) {
@@ -158,7 +159,7 @@ public class ItemServiceImpl implements ItemService {
     final Booking[] lastBooking = {null};
     final Booking[] nextBooking = {null};
 
-    LocalDateTime currentDate = LocalDateTime.now();
+    LocalDateTime currentDate = LocalDateTime.now().truncatedTo(ChronoUnit.NANOS);
 
     bookingList.forEach(booking -> {
       if (!booking.getStatus().equals(Status.APPROVED)) {

@@ -34,7 +34,7 @@ public class BookingController {
   @ResponseStatus(HttpStatus.OK)
   @GetMapping
   public List<BookingFullDto> findAllByState(@NotNull @RequestHeader(Headers.USER_ID) Long userId,
-                                             @NotNull @RequestParam(defaultValue = "ALL", name = "state") String state,
+                                             @NotNull @RequestParam(defaultValue = "ALL", name = "state") State state,
                                              @PositiveOrZero @RequestParam(defaultValue = "0", name = "from") int from,
                                              @Positive @RequestParam(defaultValue = "10", name = "size") int size) {
     return bookingService.findAllByState(state, userId, from, size);
@@ -49,7 +49,7 @@ public class BookingController {
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/owner")
   public List<BookingFullDto> findAllByStateForOwner(@NotNull @RequestHeader(Headers.USER_ID) Long userId,
-                                                     @NotNull @RequestParam(defaultValue = "ALL", name = "state") String state,
+                                                     @NotNull @RequestParam(defaultValue = "ALL", name = "state") State state,
                                                      @PositiveOrZero @RequestParam(defaultValue = "0", name = "from") int from,
                                                      @Positive @RequestParam(defaultValue = "10", name = "size") int size) {
 

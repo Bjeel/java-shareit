@@ -41,12 +41,12 @@ public class ItemClient extends BaseClient {
     return patch("/" + itemDto.getId(), itemDto.getOwner(), itemDto);
   }
 
-  public ResponseEntity<Object> delete(Long itemId) {
-    return delete("/" + itemId);
+  public void delete(Long itemId) {
+    delete("/" + itemId);
   }
 
   public ResponseEntity<Object> addComment(CommentDto commentDto) {
-    return post("/" + commentDto.getItemId() + "/comment", commentDto);
+    return post("/" + commentDto.getItemId() + "/comment", commentDto.getAuthorId(), commentDto);
   }
 
   public ResponseEntity<Object> search(String text) {
