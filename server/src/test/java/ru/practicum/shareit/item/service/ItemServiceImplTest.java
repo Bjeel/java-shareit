@@ -84,7 +84,7 @@ class ItemServiceImplTest {
 
   @Test
   void findAll() {
-    when(itemRepository.findAllByOwner(user.getId()))
+    when(itemRepository.findAllByOwnerOrderByIdAsc(user.getId()))
       .thenReturn(List.of(item));
     when(bookingRepository.findAllByItem(any()))
       .thenReturn(List.of());
@@ -99,7 +99,7 @@ class ItemServiceImplTest {
     assertThat(savedItems.get(0).getDescription(), is(itemDto.getDescription()));
     assertThat(savedItems.get(0).getAvailable(), is(itemDto.getAvailable()));
 
-    verify(itemRepository).findAllByOwner(user.getId());
+    verify(itemRepository).findAllByOwnerOrderByIdAsc(user.getId());
   }
 
   @Test

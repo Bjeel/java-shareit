@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.domain.Status;
 import ru.practicum.shareit.booking.domain.Booking;
 import ru.practicum.shareit.booking.domain.BookingMapper;
 import ru.practicum.shareit.booking.repository.BookingRepository;

@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.State;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.domain.Status;
 import ru.practicum.shareit.booking.domain.Booking;
 import ru.practicum.shareit.booking.domain.BookingDto;
 import ru.practicum.shareit.booking.domain.BookingFullDto;

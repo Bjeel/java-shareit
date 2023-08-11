@@ -12,7 +12,6 @@ import ru.practicum.shareit.user.domain.UserMarker;
 
 import javax.validation.Valid;
 
-
 @Controller
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor

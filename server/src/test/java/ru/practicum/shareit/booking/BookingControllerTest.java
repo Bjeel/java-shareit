@@ -13,6 +13,7 @@ import org.springframework.web.context.WebApplicationContext;
 import ru.practicum.shareit.booking.domain.BookingDto;
 import ru.practicum.shareit.booking.domain.BookingFullDto;
 
+import ru.practicum.shareit.booking.domain.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import ru.practicum.shareit.consts.Headers;

@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.domain;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.comments.domain.CommentMapper;
-import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.request.domain.ItemRequestMapper;
 
 import java.util.stream.Collectors;
@@ -11,10 +10,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {
   public static ItemDto toItemDto(Item item) {
-    if (item == null) {
-      throw new EntityNotFoundException("Item не может быть null");
-    }
-
     return ItemDto
       .builder()
       .id(item.getId())
@@ -27,10 +22,6 @@ public class ItemMapper {
   }
 
   public static Item toItemFromDto(ItemDto item) {
-    if (item == null) {
-      throw new EntityNotFoundException("Item не может быть null");
-    }
-
     Item newItem = new Item();
 
     newItem.setId(item.getId());
@@ -60,10 +51,6 @@ public class ItemMapper {
   }
 
   public static Item toUpdatedItem(ItemDto item, Item updatedItem) {
-    if (item == null || updatedItem == null) {
-      throw new EntityNotFoundException("Item не может быть null");
-    }
-
     if (item.getId() != null) {
       updatedItem.setId(item.getId());
     }

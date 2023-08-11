@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.domain.Item;
 import ru.practicum.shareit.user.domain.User;
 

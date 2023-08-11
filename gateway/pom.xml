@@ -51,10 +51,9 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
       <dependency>
         <groupId>ru.practicum</groupId>
-        <artifactId>shareit-server</artifactId>
+        <artifactId>shareit-common</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <scope>compile</scope>
       </dependency>

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.error_handler;
 
 import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.ErrorResponse;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
