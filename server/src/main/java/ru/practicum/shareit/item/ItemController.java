@@ -16,17 +16,15 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@Validated
 @RestController
 @RequestMapping("/items")
 @AllArgsConstructor
 public class ItemController {
   private final ItemService itemService;
 
-  @Validated({ItemMarker.OnCreate.class})
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
-  public ItemDto create(@Valid @RequestBody ItemDto item, @NotNull @RequestHeader(Headers.USER_ID) Long userId) {
+  public ItemDto create(@RequestBody ItemDto item, @RequestHeader(Headers.USER_ID) Long userId) {
     item.setOwner(userId);
 
     return itemService.create(item);
@@ -34,9 +32,9 @@ public class ItemController {
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/{id}/comment")
-  public CommentNewDto addComment(@Valid @RequestBody CommentDto commentDto,
+  public CommentNewDto addComment(@RequestBody CommentDto commentDto,
                                   @PathVariable Long id,
-                                  @NotNull @RequestHeader(Headers.USER_ID) Long userId) {
+                                  @RequestHeader(Headers.USER_ID) Long userId) {
     commentDto.setAuthorId(userId);
     commentDto.setItemId(id);
 
@@ -45,19 +43,19 @@ public class ItemController {
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/{itemId}")
-  public ItemFullDto findOne(@NotNull @RequestHeader(Headers.USER_ID) Long userId, @PathVariable Long itemId) {
+  public ItemFullDto findOne(@RequestHeader(Headers.USER_ID) Long userId, @PathVariable Long itemId) {
     return itemService.findOne(itemId, userId);
   }
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping
-  public List<ItemFullDto> findAll(@NotNull @RequestHeader(Headers.USER_ID) Long userId) {
+  public List<ItemFullDto> findAll(@RequestHeader(Headers.USER_ID) Long userId) {
     return itemService.findAll(userId);
   }
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/search")
-  public List<ItemDto> search(@NotNull @RequestParam String text) {
+  public List<ItemDto> search(@RequestParam String text) {
     return itemService.search(text);
   }
 
@@ -65,7 +63,7 @@ public class ItemController {
   @PatchMapping("/{itemId}")
   public ItemDto update(@PathVariable Long itemId,
                         @RequestBody ItemDto item,
-                        @NotNull @RequestHeader(Headers.USER_ID) Long userId) {
+                        @RequestHeader(Headers.USER_ID) Long userId) {
     item.setId(itemId);
     item.setOwner(userId);
 

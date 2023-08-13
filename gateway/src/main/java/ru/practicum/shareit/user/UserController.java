@@ -18,23 +18,26 @@ import javax.validation.Valid;
 @Slf4j
 @Validated
 public class UserController {
-	private final UserClient userClient;
+  private final UserClient userClient;
 
+  @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
   public ResponseEntity<Object> create(@Valid @RequestBody UserDto user) {
     log.info("Create user = {}", user);
     return userClient.create(user);
   }
 
-	@GetMapping("/{userId}")
-	public ResponseEntity<Object> get(@PathVariable Long userId) {
-		log.info("Get userId={}", userId);
-		return userClient.finOne(userId);
-	}
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/{userId}")
+  public ResponseEntity<Object> get(@PathVariable Long userId) {
+    log.info("Get userId={}", userId);
+    return userClient.finOne(userId);
+  }
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping
   public ResponseEntity<Object> findAll() {
+    log.info("Find all users");
     return userClient.findAll();
   }
 
@@ -43,12 +46,14 @@ public class UserController {
   public ResponseEntity<Object> update(@PathVariable Long userId, @Valid @RequestBody UserDto user) {
     user.setId(userId);
 
+    log.info("Update user = {}", user);
     return userClient.update(user);
   }
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{userId}")
   public void delete(@PathVariable Long userId) {
+    log.info("Delete user = {}", userId);
     userClient.delete(userId);
   }
 }

@@ -23,7 +23,7 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 @Validated
 public class ItemRequestController {
-	private final ItemRequestClient itemRequestClient;
+  private final ItemRequestClient itemRequestClient;
 
   @ResponseStatus(HttpStatus.CREATED)
   @Validated({ItemRequestMarker.OnCreate.class})
@@ -32,12 +32,14 @@ public class ItemRequestController {
     itemRequestDto.setRequester(userId);
     itemRequestDto.setCreated(LocalDateTime.now().truncatedTo(ChronoUnit.NANOS));
 
+    log.info("Create request = {}", itemRequestDto);
     return itemRequestClient.create(itemRequestDto);
   }
 
   @ResponseStatus(HttpStatus.OK)
   @GetMapping
   public ResponseEntity<Object> findAllByRequester(@NotNull @RequestHeader(Headers.USER_ID) Long userId) {
+    log.info("Find all requests for requester = {}", userId);
     return itemRequestClient.findAllByRequester(userId);
   }
 
@@ -46,13 +48,15 @@ public class ItemRequestController {
   public ResponseEntity<Object> findALlPageable(@NotNull @RequestHeader(Headers.USER_ID) Long userId,
                                                 @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                 @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+    log.info("Find all user = {}, from = {}, size = {}", userId, from, size);
     return itemRequestClient.findALlPageable(userId, from, size);
   }
 
   @ResponseStatus(HttpStatus.OK)
-  @GetMapping("/{id}")
-  public ResponseEntity<Object> findById(@NotNull @RequestHeader(Headers.USER_ID) Long userId, @NotNull @PathVariable Long id
-  ) {
-    return itemRequestClient.finById(userId, id);
+  @GetMapping("/{requestId}")
+  public ResponseEntity<Object> findById(@NotNull @RequestHeader(Headers.USER_ID) Long userId,
+                                         @NotNull @PathVariable Long requestId) {
+    log.info("Find request = {}, user = {}", requestId, userId);
+    return itemRequestClient.finById(userId, requestId);
   }
 }

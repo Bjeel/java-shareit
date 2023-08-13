@@ -28,7 +28,7 @@ public class BookingClient extends BaseClient {
   }
 
   public ResponseEntity<Object> approve(Long id, Boolean approved, Long userId) {
-    return patch("/" + id + "?approved=" + approved, userId, null);
+    return patch(String.format("/%s?approved=%s", id, approved), userId, null);
   }
 
   public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
