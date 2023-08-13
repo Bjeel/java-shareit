@@ -2,18 +2,14 @@ package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.comments.domain.CommentDto;
 import ru.practicum.shareit.comments.domain.CommentNewDto;
 import ru.practicum.shareit.consts.Headers;
 import ru.practicum.shareit.item.domain.ItemDto;
 import ru.practicum.shareit.item.domain.ItemFullDto;
-import ru.practicum.shareit.item.domain.ItemMarker;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController

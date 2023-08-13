@@ -14,7 +14,6 @@ import ru.practicum.shareit.item.domain.ItemDto;
 import ru.practicum.shareit.item.domain.ItemMarker;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Controller

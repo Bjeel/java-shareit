@@ -2,16 +2,11 @@ package ru.practicum.shareit.request;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.consts.Headers;
 import ru.practicum.shareit.request.domain.ItemRequestDto;
-import ru.practicum.shareit.request.domain.ItemRequestMarker;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
